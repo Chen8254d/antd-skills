@@ -1,0 +1,373 @@
+# Ant Design 组件规范配置
+# 用于 @antd:component 和 @antd:docs 命令
+
+version: "1.0.0"
+antd_version: "5.x"
+
+# ============================================
+# 组件分类
+# ============================================
+categories:
+  general:
+    name: 通用
+    components: [Button, Icon, Typography]
+  layout:
+    name: 布局
+    components: [Divider, Grid, Layout, Space, Flex]
+  navigation:
+    name: 导航
+    components: [Anchor, Breadcrumb, Dropdown, Menu, Pagination, Steps]
+  data_entry:
+    name: 数据录入
+    components: [AutoComplete, Checkbox, ColorPicker, DatePicker, Form, Input, InputNumber, Radio, Rate, Select, Slider, Switch, TimePicker, Transfer, TreeSelect, Upload]
+  data_display:
+    name: 数据展示
+    components: [Avatar, Badge, Calendar, Card, Carousel, Collapse, Descriptions, Empty, Image, List, Popover, QRCode, Segmented, Statistic, Table, Tabs, Tag, Timeline, Tooltip, Tour, Tree]
+  feedback:
+    name: 反馈
+    components: [Alert, Drawer, Message, Modal, Notification, Popconfirm, Progress, Result, Skeleton, Spin, Watermark]
+
+# ============================================
+# 组件最佳实践
+# ============================================
+components:
+  # ==================== Button ====================
+  Button:
+    description: 按钮组件
+    recommended_props:
+      - type: "指定按钮类型：primary | dashed | link | text | default"
+      - size: "按钮大小：large | middle | small"
+      - icon: "设置按钮图标"
+      - loading: "加载状态，防止重复点击"
+      - disabled: "禁用状态"
+    best_practices:
+      - "主操作使用 type='primary'，次要操作使用默认类型"
+      - "危险操作使用 danger 属性"
+      - "图标按钮建议搭配 Tooltip 提示"
+      - "提交按钮必须设置 loading 状态"
+    examples:
+      basic: |
+        <Button type="primary">主按钮</Button>
+        <Button>默认按钮</Button>
+        <Button type="dashed">虚线按钮</Button>
+        <Button type="link">链接按钮</Button>
+      with_icon: |
+        <Button type="primary" icon={<PlusOutlined />}>
+          新建
+        </Button>
+      loading: |
+        <Button type="primary" loading={submitting} onClick={handleSubmit}>
+          提交
+        </Button>
+
+  # ==================== Table ====================
+  Table:
+    description: 表格组件
+    required_props:
+      - rowKey: "表格行 key，必须设置"
+      - columns: "列定义"
+      - dataSource: "数据源"
+    recommended_props:
+      - loading: "加载状态"
+      - pagination: "分页配置"
+      - rowSelection: "行选择配置"
+      - scroll: "滚动配置"
+      - size: "表格大小"
+    best_practices:
+      - "必须设置 rowKey，使用唯一标识字段"
+      - "数据量大时设置 scroll.x 和 scroll.y"
+      - "分页配置建议包含 showSizeChanger、showQuickJumper、showTotal"
+      - "操作列固定在右侧 fixed: 'right'"
+      - "长文本使用 ellipsis 截断并添加 Tooltip"
+    examples:
+      basic: |
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={data}
+          loading={loading}
+          pagination={{
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total) => `共 ${total} 条`,
+          }}
+        />
+      with_selection: |
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={data}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: setSelectedRowKeys,
+          }}
+        />
+
+  # ==================== Form ====================
+  Form:
+    description: 表单组件
+    recommended_props:
+      - form: "表单实例，使用 Form.useForm() 获取"
+      - layout: "布局：horizontal | vertical | inline"
+      - onFinish: "提交表单且数据验证成功后回调"
+      - initialValues: "初始值"
+      - validateMessages: "验证消息配置"
+    best_practices:
+      - "使用 Form.useForm() 获取表单实例以便外部控制"
+      - "使用 layout='vertical' 布局更清晰"
+      - "复杂表单使用 Form.List 处理动态字段"
+      - "设置 validateMessages 自定义验证提示"
+      - "提交按钮使用 htmlType='submit'"
+    examples:
+      basic: |
+        const [form] = Form.useForm();
+        
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{ status: 'active' }}
+        >
+          <Form.Item
+            name="name"
+            label="名称"
+            rules={[{ required: true, message: '请输入名称' }]}
+          >
+            <Input placeholder="请输入名称" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              提交
+            </Button>
+          </Form.Item>
+        </Form>
+
+  # ==================== Modal ====================
+  Modal:
+    description: 对话框组件
+    recommended_props:
+      - open: "是否显示"
+      - title: "标题"
+      - onOk: "确认回调"
+      - onCancel: "取消回调"
+      - confirmLoading: "确认按钮 loading"
+      - destroyOnClose: "关闭时销毁"
+      - maskClosable: "点击蒙层是否关闭"
+    best_practices:
+      - "表单弹窗建议设置 destroyOnClose"
+      - "重要操作建议设置 maskClosable={false}"
+      - "确认操作使用 Modal.confirm()"
+      - "弹窗内表单使用 forceRender 避免验证问题"
+    examples:
+      basic: |
+        <Modal
+          title="标题"
+          open={visible}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          confirmLoading={loading}
+        >
+          <p>内容</p>
+        </Modal>
+      confirm: |
+        Modal.confirm({
+          title: '确认删除',
+          content: '删除后不可恢复，确定要删除吗？',
+          okText: '确认',
+          cancelText: '取消',
+          onOk: handleDelete,
+        });
+
+  # ==================== Drawer ====================
+  Drawer:
+    description: 抽屉组件
+    recommended_props:
+      - open: "是否显示"
+      - title: "标题"
+      - placement: "位置：top | right | bottom | left"
+      - width: "宽度（左右抽屉）"
+      - height: "高度（上下抽屉）"
+      - onClose: "关闭回调"
+      - footer: "底部内容"
+      - destroyOnClose: "关闭时销毁"
+    best_practices:
+      - "详情抽屉宽度建议 600-800px"
+      - "表单抽屉建议添加 footer 操作栏"
+      - "使用 styles.body 设置内容区样式"
+    examples:
+      basic: |
+        <Drawer
+          title="详情"
+          placement="right"
+          width={600}
+          open={visible}
+          onClose={onClose}
+          footer={
+            <Space>
+              <Button onClick={onClose}>取消</Button>
+              <Button type="primary" onClick={handleSubmit}>
+                确定
+              </Button>
+            </Space>
+          }
+        >
+          <p>内容</p>
+        </Drawer>
+
+  # ==================== Message ====================
+  Message:
+    description: 全局提示
+    api_usage:
+      success: "message.success('操作成功')"
+      error: "message.error('操作失败')"
+      warning: "message.warning('请注意')"
+      info: "message.info('提示信息')"
+      loading: "message.loading('加载中...')"
+    best_practices:
+      - "成功操作使用 message.success()"
+      - "失败操作使用 message.error()"
+      - "警告提示使用 message.warning()"
+      - "长时间操作使用 message.loading()"
+
+  # ==================== Notification ====================
+  Notification:
+    description: 通知提醒框
+    api_usage:
+      success: |
+        notification.success({
+          message: '操作成功',
+          description: '详细描述信息',
+        })
+    best_practices:
+      - "需要详细描述时使用 notification"
+      - "简单提示使用 message"
+      - "可设置 placement 控制显示位置"
+
+  # ==================== Skeleton ====================
+  Skeleton:
+    description: 骨架屏组件
+    recommended_props:
+      - active: "是否显示动画"
+      - paragraph: "段落配置"
+      - avatar: "头像配置"
+      - title: "标题配置"
+    best_practices:
+      - "页面初始加载使用骨架屏"
+      - "列表加载使用骨架屏占位"
+      - "配合 loading 状态切换"
+    examples:
+      basic: |
+        {loading ? (
+          <Skeleton active paragraph={{ rows: 10 }} />
+        ) : (
+          <Content />
+        )}
+      list: |
+        <List
+          itemLayout="horizontal"
+          dataSource={data}
+          renderItem={(item) => (
+            <Skeleton avatar title={false} loading={loading} active>
+              <List.Item>{item.content}</List.Item>
+            </Skeleton>
+          )}
+        />
+
+  # ==================== Space ====================
+  Space:
+    description: 间距组件
+    recommended_props:
+      - size: "间距大小：small | middle | large | number"
+      - direction: "方向：vertical | horizontal"
+      - wrap: "是否自动换行"
+      - align: "对齐方式"
+    best_practices:
+      - "使用 Space 替代手动设置 margin"
+      - "按钮组使用 Space 包裹"
+      - "垂直排列使用 direction='vertical'"
+    examples:
+      basic: |
+        <Space size="middle">
+          <Button>按钮1</Button>
+          <Button>按钮2</Button>
+          <Button>按钮3</Button>
+        </Space>
+
+  # ==================== Flex ====================
+  Flex:
+    description: 弹性布局组件 (v5.10+)
+    recommended_props:
+      - gap: "间距：small | middle | large | number"
+      - justify: "主轴对齐"
+      - align: "交叉轴对齐"
+      - vertical: "是否垂直排列"
+      - wrap: "是否换行"
+    best_practices:
+      - "替代手动写 display: flex"
+      - "用于一维布局"
+      - "二维布局使用 Row/Col"
+    examples:
+      basic: |
+        <Flex gap="middle" justify="space-between" align="center">
+          <div>左侧内容</div>
+          <div>右侧内容</div>
+        </Flex>
+
+  # ==================== ProTable ====================
+  ProTable:
+    description: 高级表格 (ProComponents)
+    package: "@ant-design/pro-components"
+    recommended_props:
+      - request: "请求数据函数"
+      - columns: "列定义"
+      - search: "搜索配置"
+      - toolBarRender: "工具栏渲染"
+      - actionRef: "操作引用"
+    best_practices:
+      - "配合 request 实现自动请求"
+      - "使用 actionRef 进行表格操作"
+      - "search.labelWidth 设置标签宽度"
+      - "columns 中配置 valueType 自动渲染"
+    examples:
+      basic: |
+        <ProTable
+          rowKey="id"
+          columns={columns}
+          request={async (params) => {
+            const { data, total } = await fetchData(params);
+            return { data, success: true, total };
+          }}
+          search={{ labelWidth: 'auto' }}
+          toolBarRender={() => [
+            <Button key="add" type="primary" icon={<PlusOutlined />}>
+              新建
+            </Button>,
+          ]}
+        />
+
+  # ==================== PageContainer ====================
+  PageContainer:
+    description: 页面容器 (ProComponents)
+    package: "@ant-design/pro-components"
+    recommended_props:
+      - header: "页头配置"
+      - content: "内容区"
+      - footer: "页脚"
+      - loading: "加载状态"
+    best_practices:
+      - "用于包裹页面主体内容"
+      - "统一页面布局风格"
+      - "配合 ProLayout 使用"
+    examples:
+      basic: |
+        <PageContainer
+          header={{
+            title: '页面标题',
+            onBack: () => history.back(),
+            extra: [
+              <Button key="1">操作按钮</Button>,
+            ],
+          }}
+        >
+          <Content />
+        </PageContainer>

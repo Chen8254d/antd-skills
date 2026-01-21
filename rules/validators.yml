@@ -1,0 +1,271 @@
+# Ant Design 规范校验规则
+# 用于 @antd:check 命令
+
+version: "1.0.0"
+
+# 校验级别配置
+levels:
+  error: 3    # 必须修复
+  warning: 2  # 建议修复
+  info: 1     # 提示信息
+
+# ============================================
+# 语法级校验规则
+# ============================================
+syntax:
+  # 组件导入检查
+  - id: import-check
+    name: 组件导入检查
+    level: error
+    description: 检查组件是否正确按需导入
+    patterns:
+      - pattern: 'import antd from "antd"'
+        message: "请使用按需导入，而不是全量导入 antd"
+        fix: "使用 import { Button, Table, ... } from 'antd'"
+      - pattern: 'import \* as antd from "antd"'
+        message: "请使用按需导入"
+        fix: "使用 import { Button, Table, ... } from 'antd'"
+
+  # 属性类型验证
+  - id: prop-type-check
+    name: 属性类型检查
+    level: error
+    description: 检查组件属性类型是否正确
+    rules:
+      Table:
+        rowKey:
+          type: string | function
+          required: true
+          message: "Table 组件必须设置 rowKey 属性"
+      Form:
+        form:
+          type: FormInstance
+          recommended: true
+          message: "建议使用 Form.useForm() 获取表单实例"
+
+  # 必需属性检查
+  - id: required-props
+    name: 必需属性检查
+    level: error
+    components:
+      Table:
+        - rowKey
+      Form.Item:
+        - name (当在 Form 中使用时)
+      Select:
+        - placeholder (建议)
+      Input:
+        - placeholder (建议)
+
+# ============================================
+# 规范级校验规则
+# ============================================
+standard:
+  # 布局规范
+  - id: layout-check
+    name: 布局使用规范
+    level: warning
+    rules:
+      - id: use-flex
+        description: 优先使用 Flex 组件进行弹性布局
+        pattern: 'display:\s*flex'
+        suggestion: "考虑使用 antd 的 Flex 组件替代 CSS flex"
+      
+      - id: use-space
+        description: 使用 Space 组件管理间距
+        pattern: 'margin-right:|margin-left:|gap:'
+        suggestion: "考虑使用 Space 组件管理元素间距"
+      
+      - id: use-grid
+        description: 使用 Row/Col 进行栅格布局
+        pattern: 'display:\s*grid'
+        suggestion: "考虑使用 Row/Col 组件进行栅格布局"
+
+  # 间距规范
+  - id: spacing-check
+    name: 间距规范检查
+    level: info
+    rules:
+      - description: 使用统一的间距变量
+        valid_values: [4, 8, 12, 16, 24, 32, 48]
+        message: "间距值应使用 4 的倍数，推荐值: 4, 8, 12, 16, 24, 32, 48"
+
+  # 颜色规范
+  - id: color-check
+    name: 颜色使用规范
+    level: warning
+    rules:
+      - description: 使用 Design Token 中的颜色
+        pattern: 'color:\s*#[0-9a-fA-F]{3,6}'
+        message: "建议使用 token.colorPrimary 等 Design Token 变量"
+        fix: "import { theme } from 'antd'; const { token } = theme.useToken();"
+
+  # 字体规范
+  - id: font-check
+    name: 字体规范检查
+    level: info
+    rules:
+      - description: 使用 Design Token 中的字体配置
+        pattern: 'font-size:\s*\d+px'
+        message: "建议使用 token.fontSize 等 Design Token 变量"
+
+# ============================================
+# 性能级校验规则
+# ============================================
+performance:
+  # 重渲染检查
+  - id: rerender-check
+    name: 重渲染风险检查
+    level: warning
+    rules:
+      - description: 避免在渲染函数中创建对象
+        pattern: 'style=\{\{'
+        message: "内联 style 对象会导致不必要的重渲染"
+        fix: "将 style 对象提取到组件外部或使用 useMemo"
+      
+      - description: 避免在渲染函数中创建函数
+        pattern: 'onClick=\{\(\)\s*=>'
+        message: "内联箭头函数可能导致不必要的重渲染"
+        fix: "使用 useCallback 包裹事件处理函数"
+
+  # 大组件拆分建议
+  - id: component-size
+    name: 组件大小检查
+    level: info
+    rules:
+      - description: 组件代码行数过多
+        max_lines: 300
+        message: "组件超过 300 行，建议拆分为更小的组件"
+
+  # 代码分割提示
+  - id: code-split
+    name: 代码分割检查
+    level: info
+    rules:
+      - description: 大型组件建议使用懒加载
+        pattern: 'import .* from'
+        suggestion: "对于大型页面组件，考虑使用 React.lazy() 进行代码分割"
+
+# ============================================
+# 体验级校验规则
+# ============================================
+experience:
+  # 加载状态检查
+  - id: loading-state
+    name: 加载状态检查
+    level: warning
+    rules:
+      - description: 表格应有加载状态
+        component: Table
+        required_props:
+          - loading
+        message: "Table 组件应设置 loading 属性处理加载状态"
+      
+      - description: 按钮应有加载状态
+        component: Button
+        context: "提交操作"
+        required_props:
+          - loading
+        message: "提交按钮应设置 loading 属性防止重复点击"
+
+  # 骨架屏检查
+  - id: skeleton-check
+    name: 骨架屏检查
+    level: info
+    rules:
+      - description: 页面初始加载应使用骨架屏
+        message: "建议使用 Skeleton 组件作为加载占位"
+        suggestion: |
+          {loading ? (
+            <Skeleton active paragraph={{ rows: 10 }} />
+          ) : (
+            <Content />
+          )}
+
+  # 错误边界检查
+  - id: error-boundary
+    name: 错误边界检查
+    level: warning
+    rules:
+      - description: 页面应有错误边界处理
+        pattern: 'ErrorBoundary'
+        message: "建议添加 ErrorBoundary 组件捕获渲染错误"
+
+  # 空状态检查
+  - id: empty-state
+    name: 空状态检查
+    level: info
+    rules:
+      - description: 列表应处理空状态
+        component: Table
+        message: "建议设置 locale.emptyText 或使用 Empty 组件处理空状态"
+
+  # 交互反馈检查
+  - id: feedback-check
+    name: 交互反馈检查
+    level: warning
+    rules:
+      - description: 删除操作应有确认
+        pattern: 'handleDelete|onDelete'
+        required: 'Popconfirm|Modal.confirm'
+        message: "删除操作应使用 Popconfirm 或 Modal.confirm 进行确认"
+      
+      - description: 操作应有反馈提示
+        pattern: 'handleSubmit|onSubmit'
+        required: 'message.success|notification'
+        message: "操作完成后应使用 message 或 notification 给予用户反馈"
+
+# ============================================
+# 无障碍访问规则
+# ============================================
+accessibility:
+  - id: a11y-image
+    name: 图片无障碍检查
+    level: warning
+    rules:
+      - description: 图片应有 alt 属性
+        component: Image
+        required_props:
+          - alt
+        message: "Image 组件应设置 alt 属性提供替代文本"
+
+  - id: a11y-button
+    name: 按钮无障碍检查
+    level: info
+    rules:
+      - description: 图标按钮应有 aria-label
+        pattern: '<Button.*icon=.*\/>'
+        message: "纯图标按钮应设置 aria-label 属性"
+
+  - id: a11y-form
+    name: 表单无障碍检查
+    level: warning
+    rules:
+      - description: 表单项应有标签
+        component: Form.Item
+        required_props:
+          - label
+        message: "Form.Item 应设置 label 属性或 aria-label"
+
+# ============================================
+# 报告模板
+# ============================================
+report_template: |
+  ## 规范检查报告
+  文件：{filename}
+  检查时间：{timestamp}
+  评分：{score}/100
+  
+  ### 统计摘要
+  - 错误 (Error): {error_count}
+  - 警告 (Warning): {warning_count}
+  - 提示 (Info): {info_count}
+  
+  ### 问题列表
+  {issues}
+  
+  ### 优化建议
+  {suggestions}
+  
+  ### 修复命令
+  {fix_commands}

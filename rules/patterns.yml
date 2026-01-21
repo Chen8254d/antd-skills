@@ -1,0 +1,437 @@
+# Ant Design 页面模式配置
+# 用于 @antd:pattern 和 @antd:search pattern 命令
+
+version: "1.0.0"
+
+# ============================================
+# 页面模式定义
+# ============================================
+patterns:
+  # ==================== 全屏弹窗模式 ====================
+  fullscreen-modal:
+    name: 全屏弹窗
+    description: 使用 Modal 实现的全屏编辑/查看模式
+    use_cases:
+      - 复杂表单编辑
+      - 详情查看
+      - 预览功能
+    features:
+      - 全屏显示
+      - 支持最大化/还原
+      - 底部固定操作栏
+    code_snippet: |
+      <Modal
+        title="标题"
+        open={visible}
+        onCancel={onClose}
+        width="100%"
+        style={{ top: 0, paddingBottom: 0 }}
+        styles={{
+          body: { height: 'calc(100vh - 110px)', overflow: 'auto' },
+        }}
+        footer={
+          <Space style={{ float: 'right' }}>
+            <Button onClick={onClose}>取消</Button>
+            <Button type="primary" onClick={handleSubmit}>确定</Button>
+          </Space>
+        }
+      >
+        <Content />
+      </Modal>
+    related_components:
+      - Modal
+      - Form
+      - Button
+
+  # ==================== 抽屉布局模式 ====================
+  drawer-layout:
+    name: 抽屉布局
+    description: 使用 Drawer 实现的侧边滑出面板
+    use_cases:
+      - 详情展示
+      - 快速编辑
+      - 筛选面板
+    features:
+      - 从侧边滑出
+      - 不阻塞主内容
+      - 支持多层嵌套
+    code_snippet: |
+      <Drawer
+        title="详情"
+        placement="right"
+        width={600}
+        open={visible}
+        onClose={onClose}
+        footer={
+          <Space style={{ float: 'right' }}>
+            <Button onClick={onClose}>取消</Button>
+            <Button type="primary" onClick={handleSubmit}>确定</Button>
+          </Space>
+        }
+        styles={{ body: { paddingBottom: 80 } }}
+      >
+        <Descriptions bordered column={1}>
+          <Descriptions.Item label="字段1">值1</Descriptions.Item>
+          <Descriptions.Item label="字段2">值2</Descriptions.Item>
+        </Descriptions>
+      </Drawer>
+    related_components:
+      - Drawer
+      - Descriptions
+      - Form
+
+  # ==================== 骨架屏页面模式 ====================
+  skeleton-page:
+    name: 骨架屏加载
+    description: 页面初始加载时显示骨架屏占位
+    use_cases:
+      - 页面初次加载
+      - 内容区域加载
+      - 列表加载
+    features:
+      - 占位显示
+      - 动画效果
+      - 结构预览
+    code_snippet: |
+      const PageSkeleton = () => (
+        <div style={{ padding: 24 }}>
+          {/* 页头骨架 */}
+          <Skeleton.Input active style={{ width: 200, marginBottom: 24 }} />
+          
+          {/* 统计卡片骨架 */}
+          <Row gutter={16} style={{ marginBottom: 24 }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Col span={6} key={i}>
+                <Card>
+                  <Skeleton active paragraph={{ rows: 2 }} />
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          
+          {/* 内容区骨架 */}
+          <Card>
+            <Skeleton active paragraph={{ rows: 10 }} />
+          </Card>
+        </div>
+      );
+
+      // 使用
+      {loading ? <PageSkeleton /> : <Content />}
+    related_components:
+      - Skeleton
+      - Card
+      - Row
+      - Col
+
+  # ==================== 分栏面板模式 ====================
+  split-panel:
+    name: 分栏面板
+    description: 左右/上下分栏的布局模式
+    use_cases:
+      - 主从结构
+      - 列表-详情
+      - 代码编辑器
+    features:
+      - 可调节宽度
+      - 响应式适配
+      - 独立滚动
+    code_snippet: |
+      <div style={{ display: 'flex', height: '100%' }}>
+        {/* 左侧面板 */}
+        <div style={{ width: 300, borderRight: '1px solid #f0f0f0', overflow: 'auto' }}>
+          <List
+            dataSource={items}
+            renderItem={(item) => (
+              <List.Item
+                onClick={() => setSelected(item)}
+                style={{ 
+                  cursor: 'pointer',
+                  background: selected?.id === item.id ? '#e6f7ff' : 'transparent'
+                }}
+              >
+                {item.title}
+              </List.Item>
+            )}
+          />
+        </div>
+        
+        {/* 右侧面板 */}
+        <div style={{ flex: 1, padding: 24, overflow: 'auto' }}>
+          {selected ? (
+            <Descriptions title="详情" bordered>
+              <Descriptions.Item label="ID">{selected.id}</Descriptions.Item>
+              <Descriptions.Item label="标题">{selected.title}</Descriptions.Item>
+            </Descriptions>
+          ) : (
+            <Empty description="请选择一项" />
+          )}
+        </div>
+      </div>
+    related_components:
+      - List
+      - Descriptions
+      - Empty
+
+  # ==================== 标签页布局模式 ====================
+  tabs-layout:
+    name: 标签页布局
+    description: 使用 Tabs 组织多个功能区块
+    use_cases:
+      - 多功能页面
+      - 设置页面
+      - 详情多视图
+    features:
+      - 切换视图
+      - 支持路由
+      - 懒加载
+    code_snippet: |
+      const TabsPage = () => {
+        const [activeKey, setActiveKey] = useState('1');
+        
+        const items = [
+          {
+            key: '1',
+            label: '基本信息',
+            children: <BasicInfo />,
+          },
+          {
+            key: '2',
+            label: '详细配置',
+            children: <DetailConfig />,
+          },
+          {
+            key: '3',
+            label: '操作记录',
+            children: <OperationLog />,
+          },
+        ];
+        
+        return (
+          <PageContainer>
+            <Card>
+              <Tabs
+                activeKey={activeKey}
+                onChange={setActiveKey}
+                items={items}
+                destroyInactiveTabPane
+              />
+            </Card>
+          </PageContainer>
+        );
+      };
+    related_components:
+      - Tabs
+      - Card
+      - PageContainer
+
+  # ==================== 步骤引导模式 ====================
+  steps-wizard:
+    name: 步骤引导
+    description: 分步骤的表单或向导流程
+    use_cases:
+      - 注册流程
+      - 创建向导
+      - 多步骤表单
+    features:
+      - 步骤指示
+      - 数据保持
+      - 可回退
+    code_snippet: |
+      const StepsWizard = () => {
+        const [current, setCurrent] = useState(0);
+        const [formData, setFormData] = useState({});
+        
+        const steps = [
+          { title: '基本信息', content: <Step1 /> },
+          { title: '详细配置', content: <Step2 /> },
+          { title: '确认提交', content: <Step3 /> },
+        ];
+        
+        const next = () => setCurrent(current + 1);
+        const prev = () => setCurrent(current - 1);
+        
+        return (
+          <Card>
+            <Steps current={current} items={steps.map(s => ({ title: s.title }))} />
+            
+            <div style={{ marginTop: 24, minHeight: 300 }}>
+              {steps[current].content}
+            </div>
+            
+            <Divider />
+            
+            <Space>
+              {current > 0 && <Button onClick={prev}>上一步</Button>}
+              {current < steps.length - 1 && (
+                <Button type="primary" onClick={next}>下一步</Button>
+              )}
+              {current === steps.length - 1 && (
+                <Button type="primary" onClick={handleSubmit}>提交</Button>
+              )}
+            </Space>
+          </Card>
+        );
+      };
+    related_components:
+      - Steps
+      - Form
+      - Button
+      - Card
+
+  # ==================== 数据看板模式 ====================
+  dashboard:
+    name: 数据看板
+    description: 用于展示数据统计和图表的仪表盘
+    use_cases:
+      - 首页概览
+      - 数据分析
+      - 监控面板
+    features:
+      - 统计卡片
+      - 图表展示
+      - 实时更新
+    code_snippet: |
+      const Dashboard = () => (
+        <PageContainer>
+          {/* 统计卡片 */}
+          <Row gutter={[16, 16]}>
+            {stats.map((stat) => (
+              <Col xs={24} sm={12} lg={6} key={stat.key}>
+                <Card>
+                  <Statistic
+                    title={stat.title}
+                    value={stat.value}
+                    prefix={stat.icon}
+                    valueStyle={{ color: stat.color }}
+                  />
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          
+          {/* 图表区域 */}
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24} lg={16}>
+              <Card title="趋势图">
+                <LineChart data={chartData} />
+              </Card>
+            </Col>
+            <Col xs={24} lg={8}>
+              <Card title="分布图">
+                <PieChart data={pieData} />
+              </Card>
+            </Col>
+          </Row>
+          
+          {/* 数据表格 */}
+          <Card title="最近数据" style={{ marginTop: 16 }}>
+            <Table rowKey="id" columns={columns} dataSource={tableData} />
+          </Card>
+        </PageContainer>
+      );
+    related_components:
+      - Statistic
+      - Card
+      - Row
+      - Col
+      - Table
+
+  # ==================== CRUD 列表模式 ====================
+  crud-list:
+    name: CRUD 列表
+    description: 标准的增删改查列表页面
+    use_cases:
+      - 数据管理
+      - 资源列表
+      - 配置管理
+    features:
+      - 搜索筛选
+      - 批量操作
+      - 新增编辑删除
+    code_snippet: |
+      const CrudList = () => {
+        const actionRef = useRef<ActionType>();
+        const [modalVisible, setModalVisible] = useState(false);
+        const [currentRow, setCurrentRow] = useState<DataType>();
+        
+        return (
+          <PageContainer>
+            <ProTable
+              rowKey="id"
+              actionRef={actionRef}
+              columns={columns}
+              request={fetchData}
+              search={{ labelWidth: 'auto' }}
+              toolBarRender={() => [
+                <Button
+                  key="create"
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    setCurrentRow(undefined);
+                    setModalVisible(true);
+                  }}
+                >
+                  新建
+                </Button>,
+              ]}
+            />
+            
+            <EditModal
+              visible={modalVisible}
+              data={currentRow}
+              onClose={() => setModalVisible(false)}
+              onSuccess={() => actionRef.current?.reload()}
+            />
+          </PageContainer>
+        );
+      };
+    related_components:
+      - ProTable
+      - Modal
+      - Form
+      - Button
+
+# ============================================
+# 模式搜索关键词
+# ============================================
+search_keywords:
+  fullscreen-modal:
+    - 全屏
+    - 弹窗
+    - 编辑
+    - modal
+  drawer-layout:
+    - 抽屉
+    - 侧边
+    - 详情
+    - drawer
+  skeleton-page:
+    - 骨架屏
+    - 加载
+    - 占位
+    - skeleton
+  split-panel:
+    - 分栏
+    - 主从
+    - 列表详情
+    - split
+  tabs-layout:
+    - 标签页
+    - tabs
+    - 多视图
+  steps-wizard:
+    - 步骤
+    - 向导
+    - 分步
+    - wizard
+  dashboard:
+    - 看板
+    - 仪表盘
+    - 统计
+    - dashboard
+  crud-list:
+    - 增删改查
+    - crud
+    - 列表管理

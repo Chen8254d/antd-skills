@@ -1,0 +1,245 @@
+/**
+ * 标准表单组件模板
+ * 命令：@antd:component Form
+ * 
+ * 特性：
+ * - 表单验证
+ * - 灵活布局
+ * - 提交处理
+ * - 重置功能
+ */
+import React, { useEffect, forwardRef, useImperativeHandle } from 'react';
+import {
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  InputNumber,
+  Switch,
+  Radio,
+  Checkbox,
+  Button,
+  Space,
+  Row,
+  Col,
+} from 'antd';
+import type { FormInstance, FormProps } from 'antd';
+
+const { TextArea } = Input;
+const { RangePicker } = DatePicker;
+
+// 表单数据类型 - 根据实际业务修改
+interface {{FormDataType}} {
+  name: string;
+  type: string;
+  status: string;
+  description?: string;
+  startDate?: any;
+  endDate?: any;
+  amount?: number;
+  isActive?: boolean;
+  priority?: string;
+  tags?: string[];
+}
+
+// 组件 Props
+interface {{ComponentName}}Props extends Omit<FormProps<{{FormDataType}}>, 'form'> {
+  initialValues?: Partial<{{FormDataType}}>;
+  onSubmit?: (values: {{FormDataType}}) => void | Promise<void>;
+  onCancel?: () => void;
+  loading?: boolean;
+  submitText?: string;
+  cancelText?: string;
+  showFooter?: boolean;
+  layout?: 'horizontal' | 'vertical' | 'inline';
+  column?: 1 | 2 | 3;
+}
+
+// 暴露的方法
+export interface {{ComponentName}}Ref {
+  form: FormInstance<{{FormDataType}}>;
+  submit: () => Promise<{{FormDataType}}>;
+  reset: () => void;
+  setValues: (values: Partial<{{FormDataType}}>) => void;
+  getValues: () => {{FormDataType}};
+}
+
+const {{ComponentName}} = forwardRef<{{ComponentName}}Ref, {{ComponentName}}Props>(
+  (
+    {
+      initialValues,
+      onSubmit,
+      onCancel,
+      loading = false,
+      submitText = '提交',
+      cancelText = '取消',
+      showFooter = true,
+      layout = 'vertical',
+      column = 2,
+      ...restProps
+    },
+    ref
+  ) => {
+    const [form] = Form.useForm<{{FormDataType}}>();
+
+    // 暴露方法给父组件
+    useImperativeHandle(ref, () => ({
+      form,
+      submit: async () => {
+        const values = await form.validateFields();
+        return values;
+      },
+      reset: () => form.resetFields(),
+      setValues: (values) => form.setFieldsValue(values),
+      getValues: () => form.getFieldsValue(),
+    }));
+
+    // 初始化表单值
+    useEffect(() => {
+      if (initialValues) {
+        form.setFieldsValue(initialValues);
+      }
+    }, [initialValues]);
+
+    // 提交处理
+    const handleFinish = async (values: {{FormDataType}}) => {
+      await onSubmit?.(values);
+    };
+
+    // 重置处理
+    const handleReset = () => {
+      form.resetFields();
+    };
+
+    // 计算列宽度
+    const colSpan = 24 / column;
+
+    return (
+      <Form<{{FormDataType}}>
+        form={form}
+        layout={layout}
+        onFinish={handleFinish}
+        initialValues={{
+          status: 'active',
+          isActive: true,
+          priority: 'medium',
+          ...initialValues,
+        }}
+        {...restProps}
+      >
+        <Row gutter={16}>
+          <Col span={colSpan}>
+            <Form.Item
+              name="name"
+              label="名称"
+              rules={[
+                { required: true, message: '请输入名称' },
+                { max: 50, message: '名称最多 50 个字符' },
+              ]}
+            >
+              <Input placeholder="请输入名称" />
+            </Form.Item>
+          </Col>
+
+          <Col span={colSpan}>
+            <Form.Item
+              name="type"
+              label="类型"
+              rules={[{ required: true, message: '请选择类型' }]}
+            >
+              <Select placeholder="请选择类型">
+                <Select.Option value="type1">类型一</Select.Option>
+                <Select.Option value="type2">类型二</Select.Option>
+                <Select.Option value="type3">类型三</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col span={colSpan}>
+            <Form.Item
+              name="status"
+              label="状态"
+              rules={[{ required: true, message: '请选择状态' }]}
+            >
+              <Select placeholder="请选择状态">
+                <Select.Option value="active">启用</Select.Option>
+                <Select.Option value="inactive">禁用</Select.Option>
+                <Select.Option value="pending">待审核</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col span={colSpan}>
+            <Form.Item name="amount" label="金额">
+              <InputNumber
+                style={{ width: '100%' }}
+                min={0}
+                precision={2}
+                placeholder="请输入金额"
+                prefix="¥"
+              />
+            </Form.Item>
+          </Col>
+
+          <Col span={colSpan}>
+            <Form.Item name="priority" label="优先级">
+              <Radio.Group>
+                <Radio.Button value="low">低</Radio.Button>
+                <Radio.Button value="medium">中</Radio.Button>
+                <Radio.Button value="high">高</Radio.Button>
+              </Radio.Group>
+            </Form.Item>
+          </Col>
+
+          <Col span={colSpan}>
+            <Form.Item name="isActive" label="是否启用" valuePropName="checked">
+              <Switch checkedChildren="是" unCheckedChildren="否" />
+            </Form.Item>
+          </Col>
+
+          <Col span={colSpan}>
+            <Form.Item name="tags" label="标签">
+              <Select mode="tags" placeholder="输入标签后按回车添加">
+                <Select.Option value="tag1">标签一</Select.Option>
+                <Select.Option value="tag2">标签二</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col span={24}>
+            <Form.Item
+              name="description"
+              label="描述"
+              rules={[{ max: 500, message: '描述最多 500 个字符' }]}
+            >
+              <TextArea
+                rows={4}
+                placeholder="请输入描述"
+                showCount
+                maxLength={500}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {showFooter && (
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {submitText}
+              </Button>
+              {onCancel && (
+                <Button onClick={onCancel}>{cancelText}</Button>
+              )}
+              <Button onClick={handleReset}>重置</Button>
+            </Space>
+          </Form.Item>
+        )}
+      </Form>
+    );
+  }
+);
+
+{{ComponentName}}.displayName = '{{ComponentName}}';
+
+export default {{ComponentName}};

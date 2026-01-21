@@ -1,0 +1,380 @@
+/**
+ * 表单页面模板
+ * 命令：@antd:create page form
+ * 
+ * 特性：
+ * - 分步表单
+ * - 表单验证
+ * - 数据回显
+ * - 提交确认
+ */
+import React, { useState, useEffect } from 'react';
+import {
+  Card,
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  InputNumber,
+  Switch,
+  Radio,
+  Checkbox,
+  Upload,
+  Button,
+  Space,
+  Divider,
+  Row,
+  Col,
+  message,
+  Skeleton,
+  Steps,
+  Result,
+} from 'antd';
+import {
+  SaveOutlined,
+  SendOutlined,
+  UploadOutlined,
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
+} from '@ant-design/icons';
+import { PageContainer, ProForm, ProFormText, ProFormSelect, ProFormTextArea } from '@ant-design/pro-components';
+import { useNavigate, useParams } from 'react-router-dom';
+
+const { TextArea } = Input;
+const { Option } = Select;
+
+// 表单数据类型
+interface {{FormDataType}} {
+  // 基本信息
+  name: string;
+  type: string;
+  description?: string;
+  
+  // 详细信息
+  startDate?: string;
+  endDate?: string;
+  budget?: number;
+  priority: 'low' | 'medium' | 'high';
+  
+  // 配置信息
+  isPublic: boolean;
+  tags?: string[];
+  attachments?: any[];
+}
+
+const {{PageName}}: React.FC = () => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEdit = !!id;
+  
+  const [form] = Form.useForm<{{FormDataType}}>();
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // 获取详情数据（编辑模式）
+  useEffect(() => {
+    if (isEdit) {
+      fetchDetail();
+    }
+  }, [id]);
+
+  const fetchDetail = async () => {
+    setLoading(true);
+    try {
+      // TODO: 替换为实际 API 调用
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 模拟数据
+      const data: {{FormDataType}} = {
+        name: '示例项目',
+        type: 'development',
+        description: '这是一个示例项目的描述',
+        priority: 'medium',
+        isPublic: true,
+        tags: ['React', 'TypeScript'],
+      };
+      
+      form.setFieldsValue(data);
+    } catch (error) {
+      message.error('获取详情失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 提交表单
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      setSubmitting(true);
+      
+      // TODO: 替换为实际 API 调用
+      console.log('提交数据:', values);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      message.success(`${isEdit ? '编辑' : '创建'}成功`);
+      setSubmitSuccess(true);
+    } catch (error) {
+      // 表单验证失败会在这里捕获
+      console.error('提交失败:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 保存草稿
+  const handleSaveDraft = async () => {
+    const values = form.getFieldsValue();
+    // TODO: 保存草稿 API
+    console.log('保存草稿:', values);
+    message.success('草稿已保存');
+  };
+
+  // 下一步
+  const handleNext = async () => {
+    try {
+      // 验证当前步骤的字段
+      if (currentStep === 0) {
+        await form.validateFields(['name', 'type', 'description']);
+      } else if (currentStep === 1) {
+        await form.validateFields(['priority']);
+      }
+      setCurrentStep(currentStep + 1);
+    } catch (error) {
+      // 验证失败
+    }
+  };
+
+  // 上一步
+  const handlePrev = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  // 步骤配置
+  const steps = [
+    { title: '基本信息', description: '填写基本信息' },
+    { title: '详细信息', description: '填写详细配置' },
+    { title: '完成', description: '确认并提交' },
+  ];
+
+  // 提交成功后的结果页
+  if (submitSuccess) {
+    return (
+      <PageContainer>
+        <Card>
+          <Result
+            status="success"
+            title={`${isEdit ? '编辑' : '创建'}成功！`}
+            subTitle="您可以继续以下操作"
+            extra={[
+              <Button type="primary" key="view" onClick={() => navigate('/list')}>
+                查看列表
+              </Button>,
+              <Button key="create" onClick={() => {
+                setSubmitSuccess(false);
+                form.resetFields();
+                setCurrentStep(0);
+              }}>
+                继续创建
+              </Button>,
+            ]}
+          />
+        </Card>
+      </PageContainer>
+    );
+  }
+
+  return (
+    <PageContainer
+      header={{
+        title: isEdit ? '编辑' : '新建',
+        onBack: () => navigate(-1),
+      }}
+    >
+      <Card>
+        <Steps
+          current={currentStep}
+          items={steps}
+          style={{ marginBottom: 40 }}
+        />
+
+        {loading ? (
+          <Skeleton active paragraph={{ rows: 10 }} />
+        ) : (
+          <Form
+            form={form}
+            layout="vertical"
+            initialValues={{
+              priority: 'medium',
+              isPublic: false,
+            }}
+            style={{ maxWidth: 800, margin: '0 auto' }}
+          >
+            {/* 步骤 1：基本信息 */}
+            <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
+              <Row gutter={24}>
+                <Col span={12}>
+                  <Form.Item
+                    name="name"
+                    label="名称"
+                    rules={[
+                      { required: true, message: '请输入名称' },
+                      { max: 50, message: '名称最多 50 个字符' },
+                    ]}
+                  >
+                    <Input placeholder="请输入名称" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="type"
+                    label="类型"
+                    rules={[{ required: true, message: '请选择类型' }]}
+                  >
+                    <Select placeholder="请选择类型">
+                      <Option value="development">开发项目</Option>
+                      <Option value="design">设计项目</Option>
+                      <Option value="research">研究项目</Option>
+                      <Option value="other">其他</Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              
+              <Form.Item
+                name="description"
+                label="描述"
+                rules={[{ max: 500, message: '描述最多 500 个字符' }]}
+              >
+                <TextArea rows={4} placeholder="请输入描述" showCount maxLength={500} />
+              </Form.Item>
+            </div>
+
+            {/* 步骤 2：详细信息 */}
+            <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+              <Row gutter={24}>
+                <Col span={12}>
+                  <Form.Item name="startDate" label="开始日期">
+                    <DatePicker style={{ width: '100%' }} placeholder="选择开始日期" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item name="endDate" label="结束日期">
+                    <DatePicker style={{ width: '100%' }} placeholder="选择结束日期" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              
+              <Row gutter={24}>
+                <Col span={12}>
+                  <Form.Item name="budget" label="预算（元）">
+                    <InputNumber
+                      style={{ width: '100%' }}
+                      min={0}
+                      precision={2}
+                      placeholder="请输入预算"
+                      formatter={value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                      parser={value => value!.replace(/¥\s?|(,*)/g, '')}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="priority"
+                    label="优先级"
+                    rules={[{ required: true, message: '请选择优先级' }]}
+                  >
+                    <Radio.Group>
+                      <Radio.Button value="low">低</Radio.Button>
+                      <Radio.Button value="medium">中</Radio.Button>
+                      <Radio.Button value="high">高</Radio.Button>
+                    </Radio.Group>
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={24}>
+                <Col span={12}>
+                  <Form.Item name="isPublic" label="是否公开" valuePropName="checked">
+                    <Switch checkedChildren="公开" unCheckedChildren="私有" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item name="tags" label="标签">
+                    <Select mode="tags" placeholder="输入标签后按回车">
+                      <Option value="React">React</Option>
+                      <Option value="TypeScript">TypeScript</Option>
+                      <Option value="Ant Design">Ant Design</Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Form.Item name="attachments" label="附件">
+                <Upload>
+                  <Button icon={<UploadOutlined />}>上传附件</Button>
+                </Upload>
+              </Form.Item>
+            </div>
+
+            {/* 步骤 3：确认信息 */}
+            <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
+              <Form.Item noStyle shouldUpdate>
+                {() => {
+                  const values = form.getFieldsValue();
+                  return (
+                    <Card title="请确认以下信息" size="small">
+                      <p><strong>名称：</strong>{values.name}</p>
+                      <p><strong>类型：</strong>{values.type}</p>
+                      <p><strong>描述：</strong>{values.description || '-'}</p>
+                      <p><strong>优先级：</strong>{values.priority}</p>
+                      <p><strong>是否公开：</strong>{values.isPublic ? '是' : '否'}</p>
+                      <p><strong>标签：</strong>{values.tags?.join(', ') || '-'}</p>
+                    </Card>
+                  );
+                }}
+              </Form.Item>
+            </div>
+
+            <Divider />
+
+            {/* 操作按钮 */}
+            <Form.Item>
+              <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Button onClick={handleSaveDraft} icon={<SaveOutlined />}>
+                  保存草稿
+                </Button>
+                <Space>
+                  {currentStep > 0 && (
+                    <Button onClick={handlePrev} icon={<ArrowLeftOutlined />}>
+                      上一步
+                    </Button>
+                  )}
+                  {currentStep < steps.length - 1 && (
+                    <Button type="primary" onClick={handleNext}>
+                      下一步 <ArrowRightOutlined />
+                    </Button>
+                  )}
+                  {currentStep === steps.length - 1 && (
+                    <Button
+                      type="primary"
+                      onClick={handleSubmit}
+                      loading={submitting}
+                      icon={<SendOutlined />}
+                    >
+                      提交
+                    </Button>
+                  )}
+                </Space>
+              </Space>
+            </Form.Item>
+          </Form>
+        )}
+      </Card>
+    </PageContainer>
+  );
+};
+
+export default {{PageName}};

@@ -1,0 +1,144 @@
+{
+  "name": "antd-design-assistant",
+  "displayName": "Ant Design 规范助手",
+  "version": "1.0.0",
+  "description": "智能化的 Ant Design 开发助手，提供代码生成、规范检查、最佳实践指导等功能",
+  "author": "AntD Skills Team",
+  "license": "MIT",
+  "repository": "https://github.com/antd-skills/antd-design-assistant",
+  "keywords": [
+    "ant-design",
+    "antd",
+    "react",
+    "ui-components",
+    "code-generation",
+    "linting",
+    "best-practices"
+  ],
+  "engines": {
+    "cursor": ">=0.40.0"
+  },
+  "main": "src/index.ts",
+  "categories": [
+    "Code Generation",
+    "Linting",
+    "Snippets",
+    "React"
+  ],
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact"
+  ],
+  "commands": {
+    "create": {
+      "prefix": "@antd:create",
+      "description": "创建标准页面/组件模板",
+      "subcommands": {
+        "page": {
+          "description": "创建页面模板",
+          "args": ["admin", "list", "form", "detail", "modal", "drawer"]
+        },
+        "component": {
+          "description": "创建组件模板"
+        }
+      }
+    },
+    "component": {
+      "prefix": "@antd:component",
+      "description": "插入标准组件（自动填充推荐属性）"
+    },
+    "pattern": {
+      "prefix": "@antd:pattern",
+      "description": "应用页面模式",
+      "args": ["fullscreen-modal", "drawer-layout", "skeleton-page", "split-panel", "tabs-layout"]
+    },
+    "check": {
+      "prefix": "@antd:check",
+      "description": "规范检查",
+      "subcommands": {
+        "current": "检查当前文件",
+        "all": "检查整个项目"
+      }
+    },
+    "fix": {
+      "prefix": "@antd:fix",
+      "description": "自动修复问题",
+      "args": ["imports", "props", "layout", "style", "skeleton", "table-props", "all"]
+    },
+    "docs": {
+      "prefix": "@antd:docs",
+      "description": "查看组件文档和最佳实践"
+    },
+    "search": {
+      "prefix": "@antd:search",
+      "description": "搜索页面模式和组件用法"
+    },
+    "config": {
+      "prefix": "@antd:config",
+      "description": "查看/修改配置"
+    },
+    "analyze": {
+      "prefix": "@antd:analyze",
+      "description": "分析当前代码上下文"
+    },
+    "suggest": {
+      "prefix": "@antd:suggest",
+      "description": "获取智能建议"
+    },
+    "batch": {
+      "prefix": "@antd:batch",
+      "description": "批量操作",
+      "subcommands": {
+        "create": "批量创建页面/组件"
+      }
+    },
+    "migrate": {
+      "prefix": "@antd:migrate",
+      "description": "版本迁移工具",
+      "args": ["v4-to-v5", "v3-to-v4"]
+    }
+  },
+  "configuration": {
+    "antdSkills.version": {
+      "type": "string",
+      "default": "5.x",
+      "enum": ["4.x", "5.x"],
+      "description": "Ant Design 版本"
+    },
+    "antdSkills.language": {
+      "type": "string",
+      "default": "typescript",
+      "enum": ["typescript", "javascript"],
+      "description": "代码语言"
+    },
+    "antdSkills.styleType": {
+      "type": "string",
+      "default": "css-in-js",
+      "enum": ["css-in-js", "less", "css-modules", "tailwind"],
+      "description": "样式方案"
+    },
+    "antdSkills.autoCheck": {
+      "type": "boolean",
+      "default": true,
+      "description": "保存时自动检查规范"
+    },
+    "antdSkills.autoFix": {
+      "type": "boolean",
+      "default": false,
+      "description": "自动修复简单问题"
+    },
+    "antdSkills.updateInterval": {
+      "type": "number",
+      "default": 24,
+      "description": "规范更新检查间隔（小时）"
+    }
+  },
+  "contributes": {
+    "rules": "./rules",
+    "templates": "./templates",
+    "patterns": "./patterns",
+    "validators": "./validators"
+  }
+}

@@ -1,0 +1,366 @@
+/**
+ * 详情页面模板
+ * 命令：@antd:create page detail
+ * 
+ * 特性：
+ * - 详情展示
+ * - 操作按钮
+ * - 关联数据
+ * - 状态流转
+ */
+import React, { useState, useEffect } from 'react';
+import {
+  Card,
+  Descriptions,
+  Tag,
+  Button,
+  Space,
+  Skeleton,
+  Divider,
+  Timeline,
+  Avatar,
+  Typography,
+  Tabs,
+  Table,
+  Empty,
+  Popconfirm,
+  message,
+  Badge,
+  Statistic,
+  Row,
+  Col,
+  Flex,
+} from 'antd';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PrinterOutlined,
+  ShareAltOutlined,
+  ClockCircleOutlined,
+  UserOutlined,
+  CheckCircleOutlined,
+  SyncOutlined,
+  CloseCircleOutlined,
+} from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-components';
+import { useNavigate, useParams } from 'react-router-dom';
+
+const { Title, Text, Paragraph } = Typography;
+
+// 数据类型定义
+interface {{DetailType}} {
+  id: string;
+  name: string;
+  status: 'draft' | 'pending' | 'approved' | 'rejected';
+  type: string;
+  description: string;
+  createdBy: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  // 扩展信息
+  extra?: Record<string, any>;
+}
+
+interface TimelineItem {
+  id: string;
+  action: string;
+  operator: string;
+  time: string;
+  remark?: string;
+}
+
+interface RelatedItem {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+}
+
+// 状态配置
+const statusConfig = {
+  draft: { text: '草稿', color: 'default', icon: <ClockCircleOutlined /> },
+  pending: { text: '待审核', color: 'processing', icon: <SyncOutlined spin /> },
+  approved: { text: '已通过', color: 'success', icon: <CheckCircleOutlined /> },
+  rejected: { text: '已拒绝', color: 'error', icon: <CloseCircleOutlined /> },
+};
+
+const {{PageName}}: React.FC = () => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  
+  const [loading, setLoading] = useState(true);
+  const [detail, setDetail] = useState<{{DetailType}} | null>(null);
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
+  const [relatedItems, setRelatedItems] = useState<RelatedItem[]>([]);
+  const [activeTab, setActiveTab] = useState('info');
+
+  useEffect(() => {
+    if (id) {
+      fetchDetail();
+    }
+  }, [id]);
+
+  const fetchDetail = async () => {
+    setLoading(true);
+    try {
+      // TODO: 替换为实际 API 调用
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 模拟数据
+      setDetail({
+        id: id!,
+        name: '示例项目名称',
+        status: 'approved',
+        type: 'development',
+        description: '这是一个示例项目的详细描述信息。可以包含多段文字内容，用于展示项目的详细情况。',
+        createdBy: {
+          id: '1',
+          name: '张三',
+        },
+        createdAt: '2024-01-15 10:30:00',
+        updatedAt: '2024-01-20 15:45:00',
+        extra: {
+          budget: 50000,
+          members: 5,
+          progress: 75,
+        },
+      });
+
+      setTimeline([
+        { id: '1', action: '创建项目', operator: '张三', time: '2024-01-15 10:30:00' },
+        { id: '2', action: '提交审核', operator: '张三', time: '2024-01-16 14:20:00' },
+        { id: '3', action: '审核通过', operator: '李四', time: '2024-01-17 09:15:00', remark: '符合要求，同意通过' },
+      ]);
+
+      setRelatedItems([
+        { id: '1', name: '关联文档 A', type: '文档', status: '已完成' },
+        { id: '2', name: '关联任务 B', type: '任务', status: '进行中' },
+        { id: '3', name: '关联资源 C', type: '资源', status: '待处理' },
+      ]);
+    } catch (error) {
+      message.error('获取详情失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 编辑
+  const handleEdit = () => {
+    navigate(`/form/${id}`);
+  };
+
+  // 删除
+  const handleDelete = async () => {
+    try {
+      // TODO: 调用删除 API
+      message.success('删除成功');
+      navigate('/list');
+    } catch (error) {
+      message.error('删除失败');
+    }
+  };
+
+  // 分享
+  const handleShare = () => {
+    // TODO: 实现分享功能
+    message.info('分享功能开发中');
+  };
+
+  // 打印
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // 关联数据表格列
+  const relatedColumns = [
+    { title: '名称', dataIndex: 'name', key: 'name' },
+    { title: '类型', dataIndex: 'type', key: 'type' },
+    { 
+      title: '状态', 
+      dataIndex: 'status', 
+      key: 'status',
+      render: (status: string) => (
+        <Tag color={status === '已完成' ? 'success' : status === '进行中' ? 'processing' : 'default'}>
+          {status}
+        </Tag>
+      ),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (_: any, record: RelatedItem) => (
+        <Button type="link" size="small">查看</Button>
+      ),
+    },
+  ];
+
+  // 获取状态配置
+  const currentStatus = detail ? statusConfig[detail.status] : null;
+
+  // Tab 内容
+  const tabItems = [
+    {
+      key: 'info',
+      label: '基本信息',
+      children: (
+        <Descriptions column={{ xs: 1, sm: 2, md: 3 }} bordered>
+          <Descriptions.Item label="ID">{detail?.id}</Descriptions.Item>
+          <Descriptions.Item label="名称">{detail?.name}</Descriptions.Item>
+          <Descriptions.Item label="类型">{detail?.type}</Descriptions.Item>
+          <Descriptions.Item label="状态">
+            {currentStatus && (
+              <Badge status={currentStatus.color as any} text={currentStatus.text} />
+            )}
+          </Descriptions.Item>
+          <Descriptions.Item label="创建人">
+            <Space>
+              <Avatar size="small" icon={<UserOutlined />} src={detail?.createdBy.avatar} />
+              {detail?.createdBy.name}
+            </Space>
+          </Descriptions.Item>
+          <Descriptions.Item label="创建时间">{detail?.createdAt}</Descriptions.Item>
+          <Descriptions.Item label="更新时间">{detail?.updatedAt}</Descriptions.Item>
+          <Descriptions.Item label="描述" span={3}>
+            <Paragraph>{detail?.description}</Paragraph>
+          </Descriptions.Item>
+        </Descriptions>
+      ),
+    },
+    {
+      key: 'timeline',
+      label: '操作记录',
+      children: (
+        <Timeline
+          items={timeline.map(item => ({
+            color: 'blue',
+            children: (
+              <div>
+                <Flex justify="space-between" align="center">
+                  <Text strong>{item.action}</Text>
+                  <Text type="secondary">{item.time}</Text>
+                </Flex>
+                <div>
+                  <Text type="secondary">操作人：{item.operator}</Text>
+                </div>
+                {item.remark && (
+                  <div style={{ marginTop: 4 }}>
+                    <Text>备注：{item.remark}</Text>
+                  </div>
+                )}
+              </div>
+            ),
+          }))}
+        />
+      ),
+    },
+    {
+      key: 'related',
+      label: '关联数据',
+      children: relatedItems.length > 0 ? (
+        <Table
+          rowKey="id"
+          columns={relatedColumns}
+          dataSource={relatedItems}
+          pagination={false}
+          size="small"
+        />
+      ) : (
+        <Empty description="暂无关联数据" />
+      ),
+    },
+  ];
+
+  return (
+    <PageContainer
+      header={{
+        title: loading ? '加载中...' : detail?.name,
+        onBack: () => navigate(-1),
+        tags: currentStatus && (
+          <Tag icon={currentStatus.icon} color={currentStatus.color}>
+            {currentStatus.text}
+          </Tag>
+        ),
+        extra: [
+          <Button key="share" icon={<ShareAltOutlined />} onClick={handleShare}>
+            分享
+          </Button>,
+          <Button key="print" icon={<PrinterOutlined />} onClick={handlePrint}>
+            打印
+          </Button>,
+          <Button key="edit" type="primary" icon={<EditOutlined />} onClick={handleEdit}>
+            编辑
+          </Button>,
+          <Popconfirm
+            key="delete"
+            title="确定要删除吗？"
+            description="删除后不可恢复"
+            onConfirm={handleDelete}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Button danger icon={<DeleteOutlined />}>
+              删除
+            </Button>
+          </Popconfirm>,
+        ],
+      }}
+    >
+      {loading ? (
+        <Card>
+          <Skeleton active paragraph={{ rows: 10 }} />
+        </Card>
+      ) : (
+        <>
+          {/* 统计卡片 */}
+          {detail?.extra && (
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col xs={24} sm={8}>
+                <Card>
+                  <Statistic
+                    title="预算"
+                    value={detail.extra.budget}
+                    prefix="¥"
+                    precision={2}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Card>
+                  <Statistic
+                    title="成员数"
+                    value={detail.extra.members}
+                    suffix="人"
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Card>
+                  <Statistic
+                    title="进度"
+                    value={detail.extra.progress}
+                    suffix="%"
+                  />
+                </Card>
+              </Col>
+            </Row>
+          )}
+
+          {/* 详情 Tabs */}
+          <Card>
+            <Tabs
+              activeKey={activeTab}
+              onChange={setActiveTab}
+              items={tabItems}
+            />
+          </Card>
+        </>
+      )}
+    </PageContainer>
+  );
+};
+
+export default {{PageName}};

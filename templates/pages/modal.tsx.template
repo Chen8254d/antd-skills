@@ -1,0 +1,249 @@
+/**
+ * 全屏弹窗页面模板
+ * 命令：@antd:create page modal
+ * 
+ * 特性：
+ * - 全屏弹窗布局
+ * - 表单提交
+ * - 异步加载
+ * - 取消确认
+ */
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import {
+  Modal,
+  Form,
+  Input,
+  Select,
+  Space,
+  Button,
+  Skeleton,
+  message,
+  Divider,
+  Row,
+  Col,
+} from 'antd';
+import type { FormInstance } from 'antd';
+
+const { TextArea } = Input;
+
+// 表单数据类型
+interface {{FormDataType}} {
+  name: string;
+  type: string;
+  description?: string;
+  status: string;
+}
+
+// 组件 Props
+interface {{ComponentName}}Props {
+  visible: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  initialData?: Partial<{{FormDataType}}>;
+  mode?: 'create' | 'edit';
+}
+
+// 暴露的方法
+export interface {{ComponentName}}Ref {
+  getForm: () => FormInstance<{{FormDataType}}>;
+  reset: () => void;
+}
+
+const {{ComponentName}} = forwardRef<{{ComponentName}}Ref, {{ComponentName}}Props>(
+  ({ visible, onClose, onSuccess, initialData, mode = 'create' }, ref) => {
+    const [form] = Form.useForm<{{FormDataType}}>();
+    const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
+
+    const isEdit = mode === 'edit';
+
+    // 暴露方法给父组件
+    useImperativeHandle(ref, () => ({
+      getForm: () => form,
+      reset: () => {
+        form.resetFields();
+        setHasChanges(false);
+      },
+    }));
+
+    // 初始化表单数据
+    useEffect(() => {
+      if (visible) {
+        if (initialData) {
+          form.setFieldsValue(initialData);
+        } else {
+          form.resetFields();
+        }
+        setHasChanges(false);
+      }
+    }, [visible, initialData]);
+
+    // 监听表单变化
+    const handleValuesChange = () => {
+      setHasChanges(true);
+    };
+
+    // 提交表单
+    const handleSubmit = async () => {
+      try {
+        const values = await form.validateFields();
+        setSubmitting(true);
+
+        // TODO: 替换为实际 API 调用
+        console.log('提交数据:', values);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        message.success(`${isEdit ? '编辑' : '创建'}成功`);
+        onSuccess?.();
+        onClose();
+      } catch (error) {
+        // 表单验证失败
+        console.error('提交失败:', error);
+      } finally {
+        setSubmitting(false);
+      }
+    };
+
+    // 关闭弹窗
+    const handleClose = () => {
+      if (hasChanges) {
+        Modal.confirm({
+          title: '确认关闭',
+          content: '有未保存的更改，确定要关闭吗？',
+          okText: '确定',
+          cancelText: '取消',
+          onOk: () => {
+            form.resetFields();
+            setHasChanges(false);
+            onClose();
+          },
+        });
+      } else {
+        onClose();
+      }
+    };
+
+    return (
+      <Modal
+        title={isEdit ? '编辑' : '新建'}
+        open={visible}
+        onCancel={handleClose}
+        width={800}
+        destroyOnClose
+        maskClosable={false}
+        footer={[
+          <Button key="cancel" onClick={handleClose}>
+            取消
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={submitting}
+            onClick={handleSubmit}
+          >
+            {isEdit ? '保存' : '创建'}
+          </Button>,
+        ]}
+      >
+        {loading ? (
+          <Skeleton active paragraph={{ rows: 6 }} />
+        ) : (
+          <Form
+            form={form}
+            layout="vertical"
+            onValuesChange={handleValuesChange}
+            initialValues={{
+              status: 'active',
+            }}
+          >
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="name"
+                  label="名称"
+                  rules={[
+                    { required: true, message: '请输入名称' },
+                    { max: 50, message: '名称最多 50 个字符' },
+                  ]}
+                >
+                  <Input placeholder="请输入名称" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="type"
+                  label="类型"
+                  rules={[{ required: true, message: '请选择类型' }]}
+                >
+                  <Select placeholder="请选择类型">
+                    <Select.Option value="type1">类型一</Select.Option>
+                    <Select.Option value="type2">类型二</Select.Option>
+                    <Select.Option value="type3">类型三</Select.Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item
+              name="status"
+              label="状态"
+              rules={[{ required: true, message: '请选择状态' }]}
+            >
+              <Select placeholder="请选择状态">
+                <Select.Option value="active">启用</Select.Option>
+                <Select.Option value="inactive">禁用</Select.Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="description"
+              label="描述"
+              rules={[{ max: 500, message: '描述最多 500 个字符' }]}
+            >
+              <TextArea
+                rows={4}
+                placeholder="请输入描述"
+                showCount
+                maxLength={500}
+              />
+            </Form.Item>
+          </Form>
+        )}
+      </Modal>
+    );
+  }
+);
+
+{{ComponentName}}.displayName = '{{ComponentName}}';
+
+export default {{ComponentName}};
+
+/**
+ * 使用示例：
+ * 
+ * ```tsx
+ * const [modalVisible, setModalVisible] = useState(false);
+ * const [editData, setEditData] = useState<FormDataType | undefined>();
+ * 
+ * // 打开新建弹窗
+ * const handleCreate = () => {
+ *   setEditData(undefined);
+ *   setModalVisible(true);
+ * };
+ * 
+ * // 打开编辑弹窗
+ * const handleEdit = (record: FormDataType) => {
+ *   setEditData(record);
+ *   setModalVisible(true);
+ * };
+ * 
+ * <{{ComponentName}}
+ *   visible={modalVisible}
+ *   onClose={() => setModalVisible(false)}
+ *   onSuccess={() => tableRef.current?.reload()}
+ *   initialData={editData}
+ *   mode={editData ? 'edit' : 'create'}
+ * />
+ * ```
+ */

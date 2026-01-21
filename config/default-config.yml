@@ -1,0 +1,166 @@
+# Ant Design Skills 默认配置
+# 全局配置文件
+
+version: "1.0.0"
+
+# ============================================
+# 基础配置
+# ============================================
+base:
+  # Ant Design 版本
+  antdVersion: "5.x"
+  
+  # 代码语言
+  language: "typescript"
+  
+  # 样式方案: css-in-js | less | css-modules | tailwind
+  styleType: "css-in-js"
+  
+  # 是否使用 ProComponents
+  useProComponents: true
+  
+  # 默认导入风格
+  importStyle: "named"  # named | default
+
+# ============================================
+# 代码生成配置
+# ============================================
+codeGeneration:
+  # 组件命名风格
+  componentNaming: "PascalCase"
+  
+  # 文件命名风格
+  fileNaming: "kebab-case"
+  
+  # 是否生成 TypeScript 类型
+  generateTypes: true
+  
+  # 默认页面模板
+  defaultPageTemplate: "list"
+  
+  # 是否添加注释
+  addComments: true
+  
+  # 缩进风格
+  indentation: "space"
+  indentSize: 2
+  
+  # 引号风格
+  quoteStyle: "single"
+  
+  # 是否使用分号
+  useSemicolon: true
+  
+  # 默认导入
+  defaultImports:
+    - "import React from 'react'"
+    - "import { message } from 'antd'"
+
+# ============================================
+# 规范检查配置
+# ============================================
+validation:
+  # 是否启用自动检查
+  autoCheck: true
+  
+  # 保存时检查
+  checkOnSave: true
+  
+  # 是否自动修复简单问题
+  autoFix: false
+  
+  # 检查级别阈值
+  levelThreshold: "warning"  # error | warning | info
+  
+  # 禁用的规则
+  disabledRules: []
+  
+  # 规则级别覆盖
+  ruleLevelOverrides: {}
+  
+  # 忽略的文件/目录
+  ignorePatterns:
+    - "node_modules/**"
+    - "dist/**"
+    - "build/**"
+    - "**/*.test.tsx"
+    - "**/*.spec.tsx"
+
+# ============================================
+# 更新配置
+# ============================================
+update:
+  # 是否自动检查更新
+  autoCheckUpdate: true
+  
+  # 更新检查间隔（小时）
+  checkInterval: 24
+  
+  # 规范仓库地址
+  repositories:
+    official: "https://github.com/ant-design/antd-skills-rules"
+    # team: "https://your-company.com/antd-skills-rules"
+  
+  # 是否允许预览版
+  allowPrerelease: false
+
+# ============================================
+# UI 配置
+# ============================================
+ui:
+  # 显示语言
+  locale: "zh_CN"
+  
+  # 是否显示提示
+  showHints: true
+  
+  # 是否显示内联建议
+  showInlineSuggestions: true
+  
+  # 问题面板显示
+  problemPanelPosition: "bottom"
+
+# ============================================
+# 性能配置
+# ============================================
+performance:
+  # 最大文件大小限制（KB）
+  maxFileSize: 500
+  
+  # 是否启用缓存
+  enableCache: true
+  
+  # 缓存过期时间（分钟）
+  cacheExpiration: 60
+  
+  # 并发检查数量
+  concurrency: 4
+
+# ============================================
+# 模板配置
+# ============================================
+templates:
+  # 页面模板目录
+  pagesDir: "src/pages"
+  
+  # 组件模板目录
+  componentsDir: "src/components"
+  
+  # 模板变量
+  variables:
+    author: ""
+    company: ""
+    license: "MIT"
+
+# ============================================
+# 插件配置
+# ============================================
+plugins:
+  # 启用的插件
+  enabled: []
+  
+  # 禁用的插件
+  disabled: []
+  
+  # 插件配置
+  options: {}

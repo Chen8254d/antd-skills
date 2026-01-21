@@ -1,0 +1,58 @@
+{
+  "name": "antd-design-assistant",
+  "displayName": "Ant Design 规范助手",
+  "version": "1.0.0",
+  "description": "智能化的 Ant Design 开发助手，提供代码生成、规范检查、最佳实践指导等功能",
+  "author": "AntD Skills Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antd-skills/antd-design-assistant"
+  },
+  "homepage": "https://github.com/antd-skills/antd-design-assistant#readme",
+  "bugs": {
+    "url": "https://github.com/antd-skills/antd-design-assistant/issues"
+  },
+  "keywords": [
+    "cursor",
+    "cursor-skills",
+    "ant-design",
+    "antd",
+    "react",
+    "ui-components",
+    "code-generation",
+    "linting",
+    "best-practices",
+    "developer-tools"
+  ],
+  "engines": {
+    "cursor": ">=0.40.0"
+  },
+  "main": "src/index.ts",
+  "files": [
+    "skill.json",
+    ".cursorrules",
+    "config/",
+    "rules/",
+    "templates/",
+    "migrations/",
+    "plugins/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "jest",
+    "build": "tsc",
+    "prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "antd": ">=4.0.0",
+    "react": ">=16.8.0"
+  }
+}

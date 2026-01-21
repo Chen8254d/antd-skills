@@ -1,0 +1,290 @@
+/**
+ * 抽屉页面模板
+ * 命令：@antd:create page drawer
+ * 
+ * 特性：
+ * - 抽屉式布局
+ * - 表单/详情切换
+ * - 底部操作栏
+ * - 宽度自适应
+ */
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import {
+  Drawer,
+  Form,
+  Input,
+  Select,
+  Button,
+  Space,
+  Skeleton,
+  Descriptions,
+  Divider,
+  Row,
+  Col,
+  Tabs,
+  message,
+  Typography,
+  Tag,
+} from 'antd';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import type { FormInstance } from 'antd';
+
+const { TextArea } = Input;
+const { Text } = Typography;
+
+// 数据类型定义
+interface {{DataType}} {
+  id?: string;
+  name: string;
+  type: string;
+  status: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// 组件 Props
+interface {{ComponentName}}Props {
+  visible: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  data?: {{DataType}};
+  mode: 'view' | 'edit' | 'create';
+}
+
+// 暴露的方法
+export interface {{ComponentName}}Ref {
+  getForm: () => FormInstance<{{DataType}}>;
+  switchMode: (mode: 'view' | 'edit') => void;
+}
+
+// 状态配置
+const statusConfig: Record<string, { text: string; color: string }> = {
+  active: { text: '启用', color: 'success' },
+  inactive: { text: '禁用', color: 'default' },
+  pending: { text: '待审核', color: 'processing' },
+};
+
+const {{ComponentName}} = forwardRef<{{ComponentName}}Ref, {{ComponentName}}Props>(
+  ({ visible, onClose, onSuccess, data, mode: initialMode }, ref) => {
+    const [form] = Form.useForm<{{DataType}}>();
+    const [mode, setMode] = useState<'view' | 'edit' | 'create'>(initialMode);
+    const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    const isViewMode = mode === 'view';
+    const isCreateMode = mode === 'create';
+
+    // 暴露方法给父组件
+    useImperativeHandle(ref, () => ({
+      getForm: () => form,
+      switchMode: (newMode) => setMode(newMode),
+    }));
+
+    // 初始化
+    useEffect(() => {
+      if (visible) {
+        setMode(initialMode);
+        if (data) {
+          form.setFieldsValue(data);
+        } else {
+          form.resetFields();
+        }
+      }
+    }, [visible, data, initialMode]);
+
+    // 提交表单
+    const handleSubmit = async () => {
+      try {
+        const values = await form.validateFields();
+        setSubmitting(true);
+
+        // TODO: 替换为实际 API 调用
+        console.log('提交数据:', { ...data, ...values });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        message.success(`${isCreateMode ? '创建' : '保存'}成功`);
+        onSuccess?.();
+        onClose();
+      } catch (error) {
+        console.error('提交失败:', error);
+      } finally {
+        setSubmitting(false);
+      }
+    };
+
+    // 切换到编辑模式
+    const handleSwitchToEdit = () => {
+      setMode('edit');
+    };
+
+    // 获取抽屉标题
+    const getTitle = () => {
+      if (isCreateMode) return '新建';
+      if (isViewMode) return '查看详情';
+      return '编辑';
+    };
+
+    // 渲染详情视图
+    const renderViewContent = () => (
+      <Descriptions column={1} bordered size="small">
+        <Descriptions.Item label="名称">{data?.name}</Descriptions.Item>
+        <Descriptions.Item label="类型">{data?.type}</Descriptions.Item>
+        <Descriptions.Item label="状态">
+          {data?.status && (
+            <Tag color={statusConfig[data.status]?.color}>
+              {statusConfig[data.status]?.text || data.status}
+            </Tag>
+          )}
+        </Descriptions.Item>
+        <Descriptions.Item label="描述">
+          {data?.description || <Text type="secondary">暂无描述</Text>}
+        </Descriptions.Item>
+        <Descriptions.Item label="创建时间">{data?.createdAt}</Descriptions.Item>
+        <Descriptions.Item label="更新时间">{data?.updatedAt}</Descriptions.Item>
+      </Descriptions>
+    );
+
+    // 渲染表单视图
+    const renderFormContent = () => (
+      <Form form={form} layout="vertical">
+        <Form.Item
+          name="name"
+          label="名称"
+          rules={[
+            { required: true, message: '请输入名称' },
+            { max: 50, message: '名称最多 50 个字符' },
+          ]}
+        >
+          <Input placeholder="请输入名称" />
+        </Form.Item>
+
+        <Form.Item
+          name="type"
+          label="类型"
+          rules={[{ required: true, message: '请选择类型' }]}
+        >
+          <Select placeholder="请选择类型">
+            <Select.Option value="type1">类型一</Select.Option>
+            <Select.Option value="type2">类型二</Select.Option>
+            <Select.Option value="type3">类型三</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="status"
+          label="状态"
+          rules={[{ required: true, message: '请选择状态' }]}
+        >
+          <Select placeholder="请选择状态">
+            <Select.Option value="active">启用</Select.Option>
+            <Select.Option value="inactive">禁用</Select.Option>
+            <Select.Option value="pending">待审核</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="description"
+          label="描述"
+          rules={[{ max: 500, message: '描述最多 500 个字符' }]}
+        >
+          <TextArea
+            rows={4}
+            placeholder="请输入描述"
+            showCount
+            maxLength={500}
+          />
+        </Form.Item>
+      </Form>
+    );
+
+    // 底部操作栏
+    const renderFooter = () => (
+      <Space style={{ float: 'right' }}>
+        <Button onClick={onClose}>取消</Button>
+        {isViewMode ? (
+          <Button type="primary" icon={<EditOutlined />} onClick={handleSwitchToEdit}>
+            编辑
+          </Button>
+        ) : (
+          <Button type="primary" loading={submitting} onClick={handleSubmit}>
+            {isCreateMode ? '创建' : '保存'}
+          </Button>
+        )}
+      </Space>
+    );
+
+    return (
+      <Drawer
+        title={getTitle()}
+        placement="right"
+        width={600}
+        open={visible}
+        onClose={onClose}
+        destroyOnClose
+        extra={
+          isViewMode && (
+            <Button type="link" icon={<EditOutlined />} onClick={handleSwitchToEdit}>
+              编辑
+            </Button>
+          )
+        }
+        footer={renderFooter()}
+        styles={{
+          body: { paddingBottom: 80 },
+        }}
+      >
+        {loading ? (
+          <Skeleton active paragraph={{ rows: 8 }} />
+        ) : isViewMode ? (
+          renderViewContent()
+        ) : (
+          renderFormContent()
+        )}
+      </Drawer>
+    );
+  }
+);
+
+{{ComponentName}}.displayName = '{{ComponentName}}';
+
+export default {{ComponentName}};
+
+/**
+ * 使用示例：
+ * 
+ * ```tsx
+ * const [drawerVisible, setDrawerVisible] = useState(false);
+ * const [drawerMode, setDrawerMode] = useState<'view' | 'edit' | 'create'>('view');
+ * const [currentData, setCurrentData] = useState<DataType | undefined>();
+ * 
+ * // 查看详情
+ * const handleView = (record: DataType) => {
+ *   setCurrentData(record);
+ *   setDrawerMode('view');
+ *   setDrawerVisible(true);
+ * };
+ * 
+ * // 新建
+ * const handleCreate = () => {
+ *   setCurrentData(undefined);
+ *   setDrawerMode('create');
+ *   setDrawerVisible(true);
+ * };
+ * 
+ * // 编辑
+ * const handleEdit = (record: DataType) => {
+ *   setCurrentData(record);
+ *   setDrawerMode('edit');
+ *   setDrawerVisible(true);
+ * };
+ * 
+ * <{{ComponentName}}
+ *   visible={drawerVisible}
+ *   onClose={() => setDrawerVisible(false)}
+ *   onSuccess={() => tableRef.current?.reload()}
+ *   data={currentData}
+ *   mode={drawerMode}
+ * />
+ * ```
+ */

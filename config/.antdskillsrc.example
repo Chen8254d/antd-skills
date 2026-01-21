@@ -1,0 +1,174 @@
+# Ant Design Skills 项目配置文件示例
+# 将此文件复制到项目根目录并重命名为 .antdskillsrc
+
+# 项目名称
+project: "my-antd-project"
+
+# ============================================
+# 覆盖全局配置
+# ============================================
+
+# Ant Design 版本 (覆盖全局配置)
+antdVersion: "5.x"
+
+# 代码语言
+language: "typescript"
+
+# 样式方案
+styleType: "css-in-js"
+
+# 是否使用 ProComponents
+useProComponents: true
+
+# ============================================
+# 项目特定配置
+# ============================================
+
+# 源码目录
+srcDir: "src"
+
+# 页面目录
+pagesDir: "src/pages"
+
+# 组件目录
+componentsDir: "src/components"
+
+# 公共组件目录
+sharedDir: "src/shared"
+
+# ============================================
+# 规范检查配置
+# ============================================
+validation:
+  # 保存时自动检查
+  checkOnSave: true
+  
+  # 自动修复
+  autoFix: false
+  
+  # 禁用的规则
+  disabledRules:
+    # - "import-check"
+    # - "rerender-check"
+  
+  # 规则级别覆盖
+  ruleLevelOverrides:
+    # component-size: "info"
+    # loading-state: "error"
+
+# ============================================
+# 项目自定义组件
+# ============================================
+customComponents:
+  # 组件库前缀
+  prefix: "@my-company/components"
+  
+  # 自定义组件列表
+  components:
+    - name: "BizTable"
+      description: "业务表格组件"
+      category: "data-display"
+      importPath: "@my-company/components"
+      props:
+        - name: "bizType"
+          type: "string"
+          description: "业务类型"
+          required: true
+    
+    - name: "BizForm"
+      description: "业务表单组件"
+      category: "data-entry"
+      importPath: "@my-company/components"
+
+# ============================================
+# 自定义页面模式
+# ============================================
+customPatterns:
+  - id: "biz-list"
+    name: "业务列表页"
+    description: "公司标准业务列表页模板"
+    template: "templates/biz-list.template"
+
+# ============================================
+# 自定义校验规则
+# ============================================
+customRules:
+  - id: "use-biz-table"
+    name: "使用业务表格"
+    description: "应使用 BizTable 替代普通 Table"
+    level: "warning"
+    pattern: "<Table"
+    message: "建议使用 BizTable 组件替代 Table"
+  
+  - id: "no-console"
+    name: "禁止 console"
+    description: "生产代码中不应包含 console"
+    level: "warning"
+    pattern: "console\\."
+    message: "请移除 console 调用"
+
+# ============================================
+# 代码生成配置
+# ============================================
+codeGeneration:
+  # 文件头注释模板
+  fileHeader: |
+    /**
+     * @file {{filename}}
+     * @description {{description}}
+     * @author {{author}}
+     * @date {{date}}
+     */
+  
+  # 默认作者
+  author: "Your Name"
+  
+  # 模板变量
+  variables:
+    company: "My Company"
+    team: "Frontend Team"
+
+# ============================================
+# 路径别名
+# ============================================
+aliases:
+  "@": "src"
+  "@components": "src/components"
+  "@pages": "src/pages"
+  "@utils": "src/utils"
+  "@hooks": "src/hooks"
+  "@services": "src/services"
+
+# ============================================
+# 忽略配置
+# ============================================
+ignore:
+  # 忽略的文件/目录
+  patterns:
+    - "node_modules/**"
+    - "dist/**"
+    - "build/**"
+    - "**/*.test.tsx"
+    - "**/*.spec.tsx"
+    - "**/*.d.ts"
+    - "src/legacy/**"
+  
+  # 忽略的规则（按文件）
+  rulesByFile:
+    "src/utils/compat.ts":
+      - "no-any"
+    "src/legacy/**":
+      - "*"  # 忽略所有规则
+
+# ============================================
+# 团队配置（可选，用于团队协作）
+# ============================================
+team:
+  # 团队规范仓库
+  rulesRepository: "https://your-company.com/antd-skills-rules"
+  
+  # 同步间隔（小时）
+  syncInterval: 24
+  
+  # 是否强制使用团队规范
+  enforceTeamRules: true

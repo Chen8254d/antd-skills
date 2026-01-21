@@ -1,0 +1,351 @@
+/**
+ * 列表页面模板
+ * 命令：@antd:create page list
+ * 
+ * 特性：
+ * - ProTable 高级表格
+ * - 搜索筛选表单
+ * - 批量操作
+ * - 新增/编辑/删除功能
+ */
+import React, { useRef, useState } from 'react';
+import {
+  Button,
+  Space,
+  Tag,
+  Popconfirm,
+  message,
+  Modal,
+  Form,
+  Input,
+  Select,
+  DatePicker,
+} from 'antd';
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  ExportOutlined,
+} from '@ant-design/icons';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { PageContainer, ProTable } from '@ant-design/pro-components';
+
+// 数据类型定义
+interface {{DataType}} {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive' | 'pending';
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 状态枚举
+const statusMap = {
+  active: { text: '启用', color: 'success' },
+  inactive: { text: '禁用', color: 'default' },
+  pending: { text: '待审核', color: 'processing' },
+};
+
+const {{PageName}}: React.FC = () => {
+  const actionRef = useRef<ActionType>();
+  const [form] = Form.useForm();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('新建');
+  const [currentRecord, setCurrentRecord] = useState<{{DataType}} | null>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // 表格列定义
+  const columns: ProColumns<{{DataType}}>[] = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      width: 80,
+      search: false,
+    },
+    {
+      title: '名称',
+      dataIndex: 'name',
+      ellipsis: true,
+      formItemProps: {
+        rules: [{ required: true, message: '请输入名称' }],
+      },
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      valueType: 'select',
+      valueEnum: {
+        active: { text: '启用', status: 'Success' },
+        inactive: { text: '禁用', status: 'Default' },
+        pending: { text: '待审核', status: 'Processing' },
+      },
+      render: (_, record) => (
+        <Tag color={statusMap[record.status]?.color}>
+          {statusMap[record.status]?.text}
+        </Tag>
+      ),
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      ellipsis: true,
+      search: false,
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createdAt',
+      valueType: 'dateTime',
+      sorter: true,
+      search: false,
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updatedAt',
+      valueType: 'dateTime',
+      sorter: true,
+      hideInSearch: true,
+    },
+    {
+      title: '创建时间范围',
+      dataIndex: 'createdAtRange',
+      valueType: 'dateTimeRange',
+      hideInTable: true,
+      search: {
+        transform: (value) => ({
+          startTime: value[0],
+          endTime: value[1],
+        }),
+      },
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      width: 180,
+      render: (_, record) => [
+        <Button
+          key="edit"
+          type="link"
+          icon={<EditOutlined />}
+          onClick={() => handleEdit(record)}
+        >
+          编辑
+        </Button>,
+        <Popconfirm
+          key="delete"
+          title="确定要删除吗？"
+          description="删除后不可恢复"
+          onConfirm={() => handleDelete(record.id)}
+          okText="确定"
+          cancelText="取消"
+        >
+          <Button type="link" danger icon={<DeleteOutlined />}>
+            删除
+          </Button>
+        </Popconfirm>,
+      ],
+    },
+  ];
+
+  // 获取数据
+  const fetchData = async (params: any, sort: any) => {
+    // TODO: 替换为实际 API 调用
+    console.log('查询参数:', params, '排序:', sort);
+    
+    // 模拟数据
+    const mockData: {{DataType}}[] = Array.from({ length: params.pageSize || 10 }).map((_, index) => ({
+      id: `${(params.current - 1) * params.pageSize + index + 1}`,
+      name: `项目 ${(params.current - 1) * params.pageSize + index + 1}`,
+      status: ['active', 'inactive', 'pending'][index % 3] as any,
+      description: '这是一段描述信息',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+
+    return {
+      data: mockData,
+      success: true,
+      total: 100,
+    };
+  };
+
+  // 新建
+  const handleCreate = () => {
+    setModalTitle('新建');
+    setCurrentRecord(null);
+    form.resetFields();
+    setModalVisible(true);
+  };
+
+  // 编辑
+  const handleEdit = (record: {{DataType}}) => {
+    setModalTitle('编辑');
+    setCurrentRecord(record);
+    form.setFieldsValue(record);
+    setModalVisible(true);
+  };
+
+  // 删除
+  const handleDelete = async (id: string) => {
+    try {
+      // TODO: 调用删除 API
+      console.log('删除:', id);
+      message.success('删除成功');
+      actionRef.current?.reload();
+    } catch (error) {
+      message.error('删除失败');
+    }
+  };
+
+  // 批量删除
+  const handleBatchDelete = async () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning('请选择要删除的数据');
+      return;
+    }
+    
+    Modal.confirm({
+      title: '确认批量删除',
+      content: `确定要删除选中的 ${selectedRowKeys.length} 条数据吗？`,
+      onOk: async () => {
+        try {
+          // TODO: 调用批量删除 API
+          console.log('批量删除:', selectedRowKeys);
+          message.success('批量删除成功');
+          setSelectedRowKeys([]);
+          actionRef.current?.reload();
+        } catch (error) {
+          message.error('批量删除失败');
+        }
+      },
+    });
+  };
+
+  // 提交表单
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      setLoading(true);
+      
+      // TODO: 调用新建/编辑 API
+      console.log(currentRecord ? '编辑:' : '新建:', values);
+      
+      message.success(`${currentRecord ? '编辑' : '新建'}成功`);
+      setModalVisible(false);
+      actionRef.current?.reload();
+    } catch (error) {
+      // 表单验证失败
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 导出
+  const handleExport = () => {
+    // TODO: 实现导出功能
+    message.info('导出功能开发中');
+  };
+
+  return (
+    <PageContainer>
+      <ProTable<{{DataType}}>
+        rowKey="id"
+        actionRef={actionRef}
+        columns={columns}
+        request={fetchData}
+        search={{
+          labelWidth: 'auto',
+          defaultCollapsed: false,
+        }}
+        pagination={{
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total) => `共 ${total} 条`,
+        }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: setSelectedRowKeys,
+        }}
+        toolBarRender={() => [
+          <Button
+            key="create"
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleCreate}
+          >
+            新建
+          </Button>,
+          selectedRowKeys.length > 0 && (
+            <Button
+              key="batchDelete"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={handleBatchDelete}
+            >
+              批量删除 ({selectedRowKeys.length})
+            </Button>
+          ),
+          <Button
+            key="export"
+            icon={<ExportOutlined />}
+            onClick={handleExport}
+          >
+            导出
+          </Button>,
+        ]}
+        tableAlertRender={({ selectedRowKeys }) =>
+          selectedRowKeys.length > 0 && (
+            <Space>
+              <span>已选择 {selectedRowKeys.length} 项</span>
+              <a onClick={() => setSelectedRowKeys([])}>取消选择</a>
+            </Space>
+          )
+        }
+      />
+
+      {/* 新建/编辑弹窗 */}
+      <Modal
+        title={modalTitle}
+        open={modalVisible}
+        onOk={handleSubmit}
+        onCancel={() => setModalVisible(false)}
+        confirmLoading={loading}
+        destroyOnClose
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          preserve={false}
+        >
+          <Form.Item
+            name="name"
+            label="名称"
+            rules={[{ required: true, message: '请输入名称' }]}
+          >
+            <Input placeholder="请输入名称" />
+          </Form.Item>
+          <Form.Item
+            name="status"
+            label="状态"
+            rules={[{ required: true, message: '请选择状态' }]}
+          >
+            <Select placeholder="请选择状态">
+              <Select.Option value="active">启用</Select.Option>
+              <Select.Option value="inactive">禁用</Select.Option>
+              <Select.Option value="pending">待审核</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="描述"
+          >
+            <Input.TextArea rows={4} placeholder="请输入描述" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </PageContainer>
+  );
+};
+
+export default {{PageName}};

@@ -1,0 +1,385 @@
+# Ant Design v4 到 v5 迁移规则
+# 用于 @antd:migrate v4-to-v5 命令
+
+version: "1.0.0"
+
+# ============================================
+# 迁移概述
+# ============================================
+overview:
+  title: "Ant Design v4 → v5 迁移指南"
+  description: |
+    此迁移工具帮助你将项目从 Ant Design v4 升级到 v5。
+    主要变更包括：
+    - CSS-in-JS 样式方案
+    - Design Token 系统
+    - 组件 API 变更
+    - 移除的组件和属性
+
+# ============================================
+# 依赖更新
+# ============================================
+dependencies:
+  update:
+    - from: '"antd": "^4"'
+      to: '"antd": "^5"'
+    - from: '"@ant-design/icons": "^4"'
+      to: '"@ant-design/icons": "^5"'
+  
+  remove:
+    - "@ant-design/compatible"
+    - "antd/dist/antd.css"
+    - "antd/dist/antd.less"
+  
+  add:
+    - "@ant-design/cssinjs"  # 可选，用于 SSR
+
+# ============================================
+# 导入变更
+# ============================================
+imports:
+  # 移除 CSS/Less 导入
+  - pattern: "import 'antd/dist/antd\\.css'"
+    replacement: "// CSS 文件已移除，v5 使用 CSS-in-JS"
+    note: "v5 使用 CSS-in-JS，无需单独导入样式"
+  
+  - pattern: "import 'antd/dist/antd\\.less'"
+    replacement: "// Less 文件已移除，v5 使用 CSS-in-JS"
+    note: "如需自定义主题，使用 ConfigProvider 的 theme 属性"
+  
+  # babel-plugin-import 不再需要
+  - pattern: "\\['import', \\{ libraryName: 'antd'"
+    note: "babel-plugin-import 在 v5 中已不需要，antd 支持 tree shaking"
+
+# ============================================
+# 组件 API 变更
+# ============================================
+components:
+  # ==================== Modal ====================
+  Modal:
+    props:
+      - from: "visible"
+        to: "open"
+        note: "visible 已废弃，使用 open"
+      - from: "bodyStyle"
+        to: "styles.body"
+        note: "bodyStyle 迁移到 styles.body"
+      - from: "maskStyle"
+        to: "styles.mask"
+        note: "maskStyle 迁移到 styles.mask"
+
+  # ==================== Drawer ====================
+  Drawer:
+    props:
+      - from: "visible"
+        to: "open"
+        note: "visible 已废弃，使用 open"
+      - from: "bodyStyle"
+        to: "styles.body"
+      - from: "headerStyle"
+        to: "styles.header"
+      - from: "footerStyle"
+        to: "styles.footer"
+      - from: "maskStyle"
+        to: "styles.mask"
+      - from: "contentWrapperStyle"
+        to: "styles.wrapper"
+
+  # ==================== Dropdown ====================
+  Dropdown:
+    props:
+      - from: "visible"
+        to: "open"
+      - from: "onVisibleChange"
+        to: "onOpenChange"
+      - from: "overlay"
+        to: "menu"
+        note: "overlay 废弃，使用 menu={{ items: [...] }}"
+
+  # ==================== Tooltip ====================
+  Tooltip:
+    props:
+      - from: "visible"
+        to: "open"
+      - from: "onVisibleChange"
+        to: "onOpenChange"
+
+  # ==================== Popover ====================
+  Popover:
+    props:
+      - from: "visible"
+        to: "open"
+      - from: "onVisibleChange"
+        to: "onOpenChange"
+
+  # ==================== Popconfirm ====================
+  Popconfirm:
+    props:
+      - from: "visible"
+        to: "open"
+      - from: "onVisibleChange"
+        to: "onOpenChange"
+
+  # ==================== Select ====================
+  Select:
+    props:
+      - from: "dropdownMatchSelectWidth"
+        to: "popupMatchSelectWidth"
+      - from: "dropdownClassName"
+        to: "popupClassName"
+
+  # ==================== DatePicker ====================
+  DatePicker:
+    props:
+      - from: "dropdownClassName"
+        to: "popupClassName"
+
+  # ==================== TreeSelect ====================
+  TreeSelect:
+    props:
+      - from: "dropdownClassName"
+        to: "popupClassName"
+
+  # ==================== Cascader ====================
+  Cascader:
+    props:
+      - from: "dropdownClassName"
+        to: "popupClassName"
+
+  # ==================== AutoComplete ====================
+  AutoComplete:
+    props:
+      - from: "dropdownClassName"
+        to: "popupClassName"
+
+  # ==================== Tabs ====================
+  Tabs:
+    props:
+      - note: "Tabs.TabPane 废弃，使用 items 属性"
+        migration: |
+          // v4
+          <Tabs>
+            <Tabs.TabPane tab="Tab 1" key="1">Content 1</Tabs.TabPane>
+            <Tabs.TabPane tab="Tab 2" key="2">Content 2</Tabs.TabPane>
+          </Tabs>
+          
+          // v5
+          <Tabs
+            items={[
+              { key: '1', label: 'Tab 1', children: 'Content 1' },
+              { key: '2', label: 'Tab 2', children: 'Content 2' },
+            ]}
+          />
+
+  # ==================== Menu ====================
+  Menu:
+    props:
+      - note: "Menu.Item, Menu.SubMenu 废弃，使用 items 属性"
+        migration: |
+          // v4
+          <Menu>
+            <Menu.Item key="1">Item 1</Menu.Item>
+            <Menu.SubMenu key="sub" title="SubMenu">
+              <Menu.Item key="2">Item 2</Menu.Item>
+            </Menu.SubMenu>
+          </Menu>
+          
+          // v5
+          <Menu
+            items={[
+              { key: '1', label: 'Item 1' },
+              { 
+                key: 'sub', 
+                label: 'SubMenu',
+                children: [{ key: '2', label: 'Item 2' }]
+              },
+            ]}
+          />
+
+  # ==================== Comment ====================
+  Comment:
+    note: "Comment 组件已从 antd 移除"
+    package: "@ant-design/compatible"
+    migration: |
+      // 安装兼容包
+      npm install @ant-design/compatible
+      
+      // 从兼容包导入
+      import { Comment } from '@ant-design/compatible';
+
+  # ==================== PageHeader ====================
+  PageHeader:
+    note: "PageHeader 组件已从 antd 移除"
+    package: "@ant-design/pro-components"
+    migration: |
+      // 使用 ProComponents
+      npm install @ant-design/pro-components
+      
+      import { PageContainer } from '@ant-design/pro-components';
+
+  # ==================== BackTop ====================
+  BackTop:
+    note: "BackTop 组件已从 antd 移除"
+    package: "FloatButton.BackTop"
+    migration: |
+      // v4
+      import { BackTop } from 'antd';
+      <BackTop />
+      
+      // v5
+      import { FloatButton } from 'antd';
+      <FloatButton.BackTop />
+
+# ============================================
+# 样式变更
+# ============================================
+styles:
+  # Less 变量迁移
+  lessVariables:
+    - from: "@primary-color"
+      to: "token.colorPrimary"
+      note: "使用 ConfigProvider 的 theme.token"
+    
+    - from: "@link-color"
+      to: "token.colorLink"
+    
+    - from: "@success-color"
+      to: "token.colorSuccess"
+    
+    - from: "@warning-color"
+      to: "token.colorWarning"
+    
+    - from: "@error-color"
+      to: "token.colorError"
+    
+    - from: "@font-size-base"
+      to: "token.fontSize"
+    
+    - from: "@border-radius-base"
+      to: "token.borderRadius"
+    
+    - from: "@text-color"
+      to: "token.colorText"
+    
+    - from: "@border-color-base"
+      to: "token.colorBorder"
+
+  # 主题配置迁移
+  themeConfig: |
+    // v4 - 使用 Less 变量
+    // config-overrides.js 或 craco.config.js
+    modifyVars: {
+      '@primary-color': '#1890ff',
+    }
+    
+    // v5 - 使用 ConfigProvider
+    import { ConfigProvider } from 'antd';
+    
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#1890ff',
+          borderRadius: 6,
+        },
+      }}
+    >
+      <App />
+    </ConfigProvider>
+
+  # 获取 Design Token
+  useToken: |
+    import { theme } from 'antd';
+    
+    const MyComponent = () => {
+      const { token } = theme.useToken();
+      
+      return (
+        <div style={{ 
+          color: token.colorPrimary,
+          backgroundColor: token.colorBgContainer,
+          borderRadius: token.borderRadius,
+        }}>
+          内容
+        </div>
+      );
+    };
+
+# ============================================
+# 正则替换规则
+# ============================================
+replacements:
+  # 属性名替换
+  - pattern: 'visible=\{([^}]+)\}'
+    replacement: 'open={$1}'
+    components: ['Modal', 'Drawer', 'Dropdown', 'Tooltip', 'Popover', 'Popconfirm']
+  
+  - pattern: 'onVisibleChange=\{([^}]+)\}'
+    replacement: 'onOpenChange={$1}'
+    components: ['Dropdown', 'Tooltip', 'Popover', 'Popconfirm']
+  
+  - pattern: 'dropdownClassName=\{([^}]+)\}'
+    replacement: 'popupClassName={$1}'
+    components: ['Select', 'DatePicker', 'TreeSelect', 'Cascader', 'AutoComplete']
+  
+  - pattern: 'dropdownMatchSelectWidth=\{([^}]+)\}'
+    replacement: 'popupMatchSelectWidth={$1}'
+    components: ['Select']
+
+# ============================================
+# 迁移检查清单
+# ============================================
+checklist:
+  - item: "更新 antd 到 v5"
+    command: "npm install antd@latest"
+  
+  - item: "移除 antd CSS/Less 导入"
+    files: ["index.tsx", "App.tsx", "main.tsx"]
+  
+  - item: "移除 babel-plugin-import 配置"
+    files: [".babelrc", "babel.config.js"]
+  
+  - item: "替换废弃的 visible 属性为 open"
+    auto: true
+  
+  - item: "替换 overlay 为 menu (Dropdown)"
+    auto: false
+    note: "需要手动重构菜单结构"
+  
+  - item: "替换 Tabs.TabPane 为 items"
+    auto: false
+    note: "需要手动重构"
+  
+  - item: "替换 Menu.Item 为 items"
+    auto: false
+    note: "需要手动重构"
+  
+  - item: "迁移 Less 变量到 Design Token"
+    auto: false
+    note: "使用 ConfigProvider theme 配置"
+  
+  - item: "移除 @ant-design/compatible（如果有）"
+    command: "npm uninstall @ant-design/compatible"
+
+# ============================================
+# 迁移报告模板
+# ============================================
+report_template: |
+  # Ant Design v4 → v5 迁移报告
+  
+  ## 概述
+  - 扫描文件数：{total_files}
+  - 需要修改的文件数：{affected_files}
+  - 自动修复项：{auto_fixable}
+  - 手动修复项：{manual_fix}
+  
+  ## 自动修复
+  {auto_fixes}
+  
+  ## 需要手动处理
+  {manual_items}
+  
+  ## 建议步骤
+  1. 先运行自动修复命令
+  2. 按照上述列表手动修改
+  3. 运行测试确保功能正常
+  4. 检查样式是否正确

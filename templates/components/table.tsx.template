@@ -1,0 +1,170 @@
+/**
+ * 标准表格组件模板
+ * 命令：@antd:component Table
+ * 
+ * 特性：
+ * - 完整的表格功能
+ * - 列配置
+ * - 分页
+ * - 排序
+ * - 筛选
+ */
+import React, { useState, useCallback } from 'react';
+import { Table, Space, Button, Tag, Tooltip, Typography } from 'antd';
+import type { TableProps, ColumnsType, TablePaginationConfig } from 'antd/es/table';
+import type { FilterValue, SorterResult } from 'antd/es/table/interface';
+import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+
+const { Text } = Typography;
+
+// 数据类型定义 - 根据实际业务修改
+interface {{DataType}} {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive' | 'pending';
+  createdAt: string;
+  // 添加更多字段...
+}
+
+// 状态配置
+const statusConfig = {
+  active: { text: '启用', color: 'success' },
+  inactive: { text: '禁用', color: 'default' },
+  pending: { text: '待审核', color: 'processing' },
+};
+
+interface {{ComponentName}}Props {
+  dataSource: {{DataType}}[];
+  loading?: boolean;
+  pagination?: TablePaginationConfig | false;
+  onView?: (record: {{DataType}}) => void;
+  onEdit?: (record: {{DataType}}) => void;
+  onDelete?: (record: {{DataType}}) => void;
+  onChange?: (
+    pagination: TablePaginationConfig,
+    filters: Record<string, FilterValue | null>,
+    sorter: SorterResult<{{DataType}}> | SorterResult<{{DataType}}>[],
+  ) => void;
+  rowSelection?: TableProps<{{DataType}}>['rowSelection'];
+}
+
+const {{ComponentName}}: React.FC<{{ComponentName}}Props> = ({
+  dataSource,
+  loading = false,
+  pagination = {
+    showSizeChanger: true,
+    showQuickJumper: true,
+    showTotal: (total) => `共 ${total} 条`,
+  },
+  onView,
+  onEdit,
+  onDelete,
+  onChange,
+  rowSelection,
+}) => {
+  // 列定义
+  const columns: ColumnsType<{{DataType}}> = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 80,
+      fixed: 'left',
+    },
+    {
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (text) => (
+        <Tooltip placement="topLeft" title={text}>
+          {text}
+        </Tooltip>
+      ),
+      sorter: true,
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 100,
+      filters: [
+        { text: '启用', value: 'active' },
+        { text: '禁用', value: 'inactive' },
+        { text: '待审核', value: 'pending' },
+      ],
+      render: (status: keyof typeof statusConfig) => (
+        <Tag color={statusConfig[status]?.color}>
+          {statusConfig[status]?.text || status}
+        </Tag>
+      ),
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 180,
+      sorter: true,
+      render: (text) => <Text type="secondary">{text}</Text>,
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 180,
+      fixed: 'right',
+      render: (_, record) => (
+        <Space size="small">
+          {onView && (
+            <Tooltip title="查看">
+              <Button
+                type="text"
+                size="small"
+                icon={<EyeOutlined />}
+                onClick={() => onView(record)}
+              />
+            </Tooltip>
+          )}
+          {onEdit && (
+            <Tooltip title="编辑">
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => onEdit(record)}
+              />
+            </Tooltip>
+          )}
+          {onDelete && (
+            <Tooltip title="删除">
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={() => onDelete(record)}
+              />
+            </Tooltip>
+          )}
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <Table<{{DataType}}>
+      rowKey="id"
+      columns={columns}
+      dataSource={dataSource}
+      loading={loading}
+      pagination={pagination}
+      onChange={onChange}
+      rowSelection={rowSelection}
+      scroll={{ x: 800 }}
+      size="middle"
+    />
+  );
+};
+
+export default {{ComponentName}};
