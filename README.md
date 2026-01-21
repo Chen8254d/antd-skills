@@ -17,7 +17,13 @@
 
 ## 📦 安装
 
-### 一行命令安装（推荐）
+### 方式一：npx 安装（推荐）
+
+```bash
+npx add-skill Chen8254d/antd-skills
+```
+
+### 方式二：Git 克隆
 
 **macOS / Linux:**
 
@@ -31,9 +37,7 @@ git clone https://github.com/Chen8254d/antd-skills.git ~/.cursor/skills/antd-ski
 git clone https://github.com/Chen8254d/antd-skills.git $env:USERPROFILE\.cursor\skills\antd-skills
 ```
 
-安装后**重启 Cursor IDE** 即可使用。
-
-### 手动安装
+### 方式三：手动安装
 
 ```bash
 # 1. 克隆仓库
@@ -44,6 +48,8 @@ cp -r antd-skills ~/.cursor/skills/
 
 # 3. 重启 Cursor IDE
 ```
+
+> 安装后**重启 Cursor IDE** 即可使用。
 
 ## 🎯 快速开始
 
