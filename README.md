@@ -17,24 +17,32 @@
 
 ## 📦 安装
 
-### Cursor IDE 安装
+### 一行命令安装（推荐）
 
-1. 打开 Cursor IDE
-2. 进入 Skills 市场（或按 `Cmd/Ctrl + Shift + P` 输入 "Install Skills"）
-3. 搜索 "Ant Design 规范助手"
-4. 点击安装
+**macOS / Linux:**
+
+```bash
+git clone https://github.com/Chen8254d/antd-skills.git ~/.cursor/skills/antd-skills
+```
+
+**Windows (PowerShell):**
+
+```powershell
+git clone https://github.com/Chen8254d/antd-skills.git $env:USERPROFILE\.cursor\skills\antd-skills
+```
+
+安装后**重启 Cursor IDE** 即可使用。
 
 ### 手动安装
 
 ```bash
-# 克隆仓库到本地
-git clone https://github.com/antd-skills/antd-design-assistant.git
+# 1. 克隆仓库
+git clone https://github.com/Chen8254d/antd-skills.git
 
-# 进入目录
-cd antd-design-assistant
+# 2. 复制到 Cursor Skills 目录
+cp -r antd-skills ~/.cursor/skills/
 
-# 在 Cursor 中打开
-cursor .
+# 3. 重启 Cursor IDE
 ```
 
 ## 🎯 快速开始
