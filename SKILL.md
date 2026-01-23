@@ -1,3 +1,10 @@
+---
+name: Ant Design 规范助手
+description: 智能化的 Ant Design 开发助手，提供代码生成、规范检查、最佳实践指导、Figma 设计稿转代码等功能
+version: 1.0.0
+author: Chen8254d
+---
+
 # Ant Design 规范助手
 
 智能化的 Ant Design 开发助手，提供代码生成、规范检查、最佳实践指导、Figma 设计稿转代码等功能。
